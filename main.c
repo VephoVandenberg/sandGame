@@ -6,7 +6,7 @@
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 
-static void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos);
+static void cursorPositionCallback(GLFWwindow *window, float xPos, float yPos);
 
 int main(int argc, char **argv)
 {
@@ -29,14 +29,13 @@ int main(int argc, char **argv)
 	while (!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
-		glClearColor(0.5f, 0.3f, 0.4f, 1.0f);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 	return 0;
 }
 
-static void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos)
+static void cursorPositionCallback(GLFWwindow *window, float xPos, float yPos)
 {
 	printf("%f %f\n", xPos, yPos);
 }
