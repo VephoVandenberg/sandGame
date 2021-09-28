@@ -3,7 +3,7 @@
 
 #include "shader.h"
 
-void createShader(const char *vertexFile, const char *fargmentFile, uint32_t *shader)
+void createShader(const char *vertexFile, const char *fargmentFile, uint32_t *shaderID)
 {
 	FILE *vertexPtr = fopen(vertexFile, "r");
 	FILE *fragmentPtr = fopen(fargmentFile, "r");
@@ -60,4 +60,14 @@ void createShader(const char *vertexFile, const char *fargmentFile, uint32_t *sh
 		glGetShaderInfoLog(fragmentID, 1024, NULL, infoLog);
 		printf("ERROR::FRAGMENT: %s.\n", infoLog);
 	}
+
+	*shaderID = glCreateProgram();
+	glAttachShader(*shaderID, vertexID);
+	glAttachShader(*shaderID, fragmentID);
+	glLinkProgram(*shaderID);
+
+	glDeleteShader(vertexID);
+	glDeleteShader(fragmentID);
+	free(vertexShaderSrc);
+	free(fragmentShaderSrc);
 }
