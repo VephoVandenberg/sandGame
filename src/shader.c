@@ -5,8 +5,24 @@
 
 void createShader(const char *vertexFile, const char *fargmentFile, uint32_t *shaderID)
 {
+	if (!shaderID)
+	{
+		printf("ShaderID variable has no set memory.");
+	}
+
 	FILE *vertexPtr = fopen(vertexFile, "r");
 	FILE *fragmentPtr = fopen(fargmentFile, "r");
+
+	if (!vertexPtr)
+	{
+		printf("FILE ERROR::VERTEX: Could not open vertex file");
+	}
+
+
+	if (!fragmentPtr)
+	{
+		printf("FILE ERROR::FRAGMENT: Could not open fragment file");
+	}
 
 	fseek(vertexPtr, 0, SEEK_END);
 	uint32_t vertexFileLength = ftell(vertexPtr);
@@ -17,6 +33,7 @@ void createShader(const char *vertexFile, const char *fargmentFile, uint32_t *sh
 	if (vertexSrc)
 	{
 		fread(vertexSrc, 1, vertexFileLength, vertexPtr);
+		cleanShaderSrc(vertexSrc);
 	}
 	else
 	{
@@ -32,10 +49,12 @@ void createShader(const char *vertexFile, const char *fargmentFile, uint32_t *sh
 	if (fragmentSrc)
 	{
 		fread(fragmentSrc, 1, fragmentFileLength, fragmentPtr);
+		cleanShaderSrc(fragmentSrc);
 	}
 	else
 	{
 		printf("LOAD ERROR::FRAGMENT: Could not load fragment shader source.\n");
+		printf("%s", fragmentSrc);
 	}
 
 	char infoLog[512];
@@ -48,7 +67,8 @@ void createShader(const char *vertexFile, const char *fargmentFile, uint32_t *sh
 	if (!success)
 	{
 		glGetShaderInfoLog(vertexID, 1024, NULL, infoLog);
-		printf("ERROR::VERTEX: %s.\n", infoLog);
+		printf("ERROR::VERTEX: %s\n", infoLog);
+		printf("%s", vertexSrc);
 	}
 
 	uint32_t fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -58,7 +78,8 @@ void createShader(const char *vertexFile, const char *fargmentFile, uint32_t *sh
 	if (!success)
 	{
 		glGetShaderInfoLog(fragmentID, 1024, NULL, infoLog);
-		printf("ERROR::FRAGMENT: %s.\n", infoLog);
+		printf("ERROR::FRAGMENT: %s\n", infoLog);
+		printf("%s", fragmentSrc);
 	}
 
 	*shaderID = glCreateProgram();
@@ -68,6 +89,58 @@ void createShader(const char *vertexFile, const char *fargmentFile, uint32_t *sh
 
 	glDeleteShader(vertexID);
 	glDeleteShader(fragmentID);
-	free(vertexShaderSrc);
-	free(fragmentShaderSrc);
+
+	
+	fclose(vertexPtr);
+	fclose(fragmentPtr);
+
+	
+	free(vertexSrc);
+	free(fragmentSrc);
+
+}
+
+void useShader(uint32_t shaderID)
+{
+	glUseProgram(shaderID);
+}
+
+void setUniform1i(uint32_t shaderID, const char *name, uint32_t value)
+{
+	glUniform1i(glGetUniformLocation(shaderID, name), value);
+}
+
+void cleanShaderSrc(char *cleanShaderSrc)
+{
+	int i;
+	uint8_t checked = 0;
+	uint8_t detected = 0;
+	for (i = 0; cleanShaderSrc[i]; i++)
+	{
+		if (!detected)
+		{
+			if (cleanShaderSrc[i] == '{')
+			{
+				detected = 1;
+				checked += 1;
+			}
+		}
+		else
+		{
+			if (cleanShaderSrc[i] == '{')
+			{
+				checked += 1;
+			}
+			else if (cleanShaderSrc[i] == '}')
+			{
+				checked -= 1;
+			}
+
+			if (checked == 0)
+			{
+				break;
+			}
+		}
+	}
+	cleanShaderSrc[++i] = '\0';
 }

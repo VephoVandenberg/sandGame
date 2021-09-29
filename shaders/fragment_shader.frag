@@ -1,11 +1,11 @@
 #version 330 core
 
 in vec2 outTexCoords;
-out vec4 resultCoords;
+out vec3 resultCoords;
 
-uniform sampler2D texture;
+uniform sampler2D uTexture;
 
 void main()
 {
-	resultCoords = texture(texture, outTexCoords)).rgba;
+	resultCoords = texture(uTexture, outTexCoords).rgb;
 }

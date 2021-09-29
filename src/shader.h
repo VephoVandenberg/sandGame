@@ -5,6 +5,8 @@
 #include <stdint.h>
 
 void createShader(const char *vertexFile, const char *fragmentFile, uint32_t *shader);
-void bindShader(uint32_t shaderID);
+void useShader(uint32_t shaderID);
+void setUniform1i(uint32_t shaderID, const char *name, uint32_t value);
+void cleanShaderSrc(char *shaderSrc);
 
 #endif
