@@ -41,13 +41,6 @@ void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight)
 			1, 2, 3
 		};
 
-		for (int i = 0; i < 5*game->height/6; i++)
-		{
-			for (int v = 0; v < game->width/2; v++)
-			{
-				game->data[i*game->height + v] = colorToInt32(&segmentColor);
-			}
-		}
 		glGenVertexArrays(1, &game->screenVAO);
 		glGenBuffers(1, &VBO);
 		glGenBuffers(1, &IBO);

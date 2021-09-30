@@ -4,6 +4,8 @@
 #include <GL\glew.h>
 #include <stdint.h>
 
+#include "color.h"
+
 typedef struct game
 {
 	uint32_t width;
@@ -16,15 +18,11 @@ typedef struct game
 	uint32_t shaderID;
 }game_t;
 
-typedef struct color
-{
-	uint8_t r;
-	uint8_t g;
-	uint8_t b;
-}color_t;
-
 void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight);
 void screenClear(game_t *game, uint32_t color);
 void render(game_t *game, float dt);
+
+void updateSand();
+void updateWater();
 
 #endif
