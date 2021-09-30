@@ -22,16 +22,18 @@ void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight)
 		game->height = screenHeight;
 		game->data = malloc(sizeof(uint32_t) * game->width * game->height);
 
-		color_t screenColor = {0, 255, 0};
+		color_t screenColor = {24, 26, 24};
 		screenClear(game, colorToInt32(&screenColor));
 
+		color_t segmentColor = {0, 255, 0};
+		
 		uint32_t VBO, IBO;
 
 		float screenVertices[16] = {
-			-1.0f, -1.0f,   0.0f, 0.0f,
-			-1.0f,  1.0f,   0.0f, 1.0f,
-			 1.0f, -1.0f, 	1.0f, 0.0f,
-			 1.0f,  1.0f, 	1.0f, 1.0f
+			-1.0f, -1.0f,   0.0f, 1.0f,
+			-1.0f,  1.0f,   0.0f, 0.0f,
+			 1.0f, -1.0f, 	1.0f, 1.0f,
+			 1.0f,  1.0f, 	1.0f, 0.0f
 		};
 
 		uint32_t screenIndexes[6] = {
@@ -39,6 +41,13 @@ void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight)
 			1, 2, 3
 		};
 
+		for (int i = 0; i < 5*game->height/6; i++)
+		{
+			for (int v = 0; v < game->width/2; v++)
+			{
+				game->data[i*game->height + v] = colorToInt32(&segmentColor);
+			}
+		}
 		glGenVertexArrays(1, &game->screenVAO);
 		glGenBuffers(1, &VBO);
 		glGenBuffers(1, &IBO);
@@ -66,14 +75,12 @@ void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-
 		useShader(game->shaderID);
 		setUniform1i(game->shaderID, "picture", 0);
-
 	}
 	else
 	{
-		printf("Game instance is not initalized");
+		printf("Game pointer is NULL.\n");
 	}
 }
 

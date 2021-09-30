@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "shader.h"
 
@@ -15,13 +16,13 @@ void createShader(const char *vertexFile, const char *fargmentFile, uint32_t *sh
 
 	if (!vertexPtr)
 	{
-		printf("FILE ERROR::VERTEX: Could not open vertex file");
+		printf("FILE ERROR::VERTEX: Could not open vertex file.\n");
 	}
 
 
 	if (!fragmentPtr)
 	{
-		printf("FILE ERROR::FRAGMENT: Could not open fragment file");
+		printf("FILE ERROR::FRAGMENT: Could not open fragment file.\n");
 	}
 
 	fseek(vertexPtr, 0, SEEK_END);
@@ -114,7 +115,7 @@ void cleanShaderSrc(char *cleanShaderSrc)
 {
 	int i;
 	uint8_t checked = 0;
-	uint8_t detected = 0;
+	bool detected = false;
 	for (i = 0; cleanShaderSrc[i]; i++)
 	{
 		if (!detected)
