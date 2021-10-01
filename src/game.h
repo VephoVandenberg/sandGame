@@ -27,10 +27,11 @@ void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight);
 void screenClear(game_t *game, uint32_t color);
 void render(game_t *game, float dt);
 
-void renderParticle(game_t *game, particle_t *particle);
-void updateParticles(game_t *game, float dt);
+void renderParticles(game_t *game);
+void updateParticles(game_t *game);
 
 particle_t getSand(void);
 particle_t getWater(void);
+particle_t getEmpty(void);
 
 #endif
