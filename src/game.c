@@ -29,6 +29,7 @@ void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight)
 		game->data 		= malloc(sizeof(uint32_t) * game->width * game->height);
 		game->numberOfParticles = game->width * game->height;
 		game->particles = malloc(sizeof(particle_t) * game->numberOfParticles);
+		fillParticles(game);
 		screenClear(game, colorToInt32(&screenColor));
 
 		color_t segmentColor = {0, 255, 0};
@@ -113,10 +114,7 @@ void updateParticles(game_t *game)
 		{
 			case SAND:
 			{
-				if (game->particles[i].position.y + 1 < game->height)
-				{
-					if ()
-				}
+				
 			}break;
 		}
 	}
@@ -153,7 +151,7 @@ particle_t getEmpty(void)
 	emptyParticle.isSolid = false;
 	emptyParticle.lifeSpan = -1.0f;
 	emptyParticle.particleType = EMPTY;
-	emptyParticle = screenColor;
+	emptyParticle.color = screenColor;
 
 	return emptyParticle;
 }
@@ -162,6 +160,6 @@ static void fillParticles(game_t *game)
 {
 	for (int i = 0; i < game->numberOfParticles; i++)
 	{
-		game[i] = getEmpty();
+		game->particles[i] = getEmpty();
 	}	
 }
