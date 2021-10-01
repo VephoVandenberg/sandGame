@@ -4,6 +4,9 @@
 #include "game.h"
 #include "shader.h"
 
+static color_t screenColor = {24, 26, 24};
+static uint32_t velocityY = 10;
+
 uint32_t colorToInt32(color_t *color);
 
 void screenClear(game_t *game, uint32_t color)
@@ -18,12 +21,12 @@ void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight)
 {
 	if (game)
 	{
-		game->width = screenWidth;
-		game->height = screenHeight;
-		game->data = malloc(sizeof(uint32_t) * game->width * game->height);
-
-		color_t screenColor = {24, 26, 24};
+		game->width 	= screenWidth;
+		game->height 	= screenHeight;
+		game->data 		= malloc(sizeof(uint32_t) * game->width * game->height);
+		game->particles = malloc(sizeof(particle_t) * game->width * game->height);
 		screenClear(game, colorToInt32(&screenColor));
+		game->numberOfParticles = 0;
 
 		color_t segmentColor = {0, 255, 0};
 		
@@ -84,5 +87,75 @@ uint32_t colorToInt32(color_t *color)
 
 void render(game_t *game, float dt)
 {
+	screenClear(game, colorToInt32(&screenColor));
+	updateParticles(game, dt);
+
+	for (int i = 0; i < game->numberOfParticles; i++)
+	{
+		renderParticle(game, &game->particles[i]);
+	}
+
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, game->width, game->height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, game->data);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+void renderParticle(game_t *game, particle_t *particle)
+{
+
+	if (particle->position.x > 0 && particle->position.x < game->width  &&
+	    particle->position.y > 0 && particle->position.y < game->height)
+	{
+		game->data[particle->position.y * game->width + particle->position.x] = colorToInt32(&particle->color);
+
+	}
+}
+
+void updateParticles(game_t *game, float dt)
+{
+	for (int i = 0; i < game->numberOfParticles; i++)
+	{
+		if (game->particles[i].position.y < game->height - 1)
+		{
+			switch(game->particles[i].particleType)
+			{
+				case SAND:
+				{
+					if (game->data[game->particles[i].position.y * game->width + 
+								  game->particles[i].position.x] == colorToInt32(&game->particles[i].color))
+					{
+
+					}
+					else
+					{
+						game->particles[i].position.y += 1;
+					}
+				}break;
+			}
+		}
+	}
+	
+}
+
+particle_t getSand(void)
+{
+	particle_t sandParticle;
+	sandParticle.isSolid = false;
+	sandParticle.lifeSpan = -1.0f;
+	sandParticle.particleType = SAND;
+	color_t color = {255, 224, 51};
+	sandParticle.color = color;
+
+	return sandParticle;
+}
+
+particle_t getWater(void)
+{
+	particle_t waterParticle;
+	waterParticle.isSolid = false;
+	waterParticle.lifeSpan = 1.0f;
+	waterParticle.particleType = WATER;
+	color_t color = {35, 137, 218};
+	waterParticle.color = color;
+
+	return waterParticle;
 }

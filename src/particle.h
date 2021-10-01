@@ -4,7 +4,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef enum type
+#include "math.h"
+
+enum type
 {
 	SAND,
 	WATER,
@@ -12,14 +14,11 @@ typedef enum type
 	FIRE,
 	SMOKE,
 	ACID,
+	SALT,
+	DUST,
+	DIRT,
 	EMPTY
-} type_t;
-
-typedef struct vec2
-{
-	uint32_t x;
-	uint32_t y;
-} vec2_t;
+};
 
 typedef struct particle
 {
@@ -27,8 +26,7 @@ typedef struct particle
 	float lifeSpan;
 	color_t color;
 	vec2_t position;
-	vec2_t velocity;
-	type_t type;
+	enum type particleType;
 } particle_t;
 
 #endif

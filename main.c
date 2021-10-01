@@ -6,9 +6,10 @@
 
 #include "src/game.h"
 #include "src/shader.h"
+#include "src/particle.h"
 
-#define SCREEN_WIDTH 1000
-#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH 950
+#define SCREEN_HEIGHT 950
 
 static void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos);
 
@@ -24,6 +25,7 @@ int main(int argc, char **argv)
 	GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sand Engine", NULL, NULL);
 	glfwSetCursorPosCallback(window, cursorPositionCallback);
 	glfwMakeContextCurrent(window);
+	glfwSwapInterval(1);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -57,5 +59,9 @@ int main(int argc, char **argv)
 
 static void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos)
 {
-	printf("%f %f\n", xPos, yPos);
+	particle_t sandParticle = getSand();
+	sandParticle.position.x = (uint32_t)xPos;
+	sandParticle.position.y = (uint32_t)yPos;
+
+	game.particles[game.numberOfParticles++] = sandParticle;
 }
