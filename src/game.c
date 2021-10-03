@@ -131,11 +131,13 @@ void updateParticles(game_t *game)
 					{
 						swapParticles(&game->particles[i], &game->particles[down]);
 					}
-					else if (game->particles[leftAndDown].particleType == EMPTY)
+					else if (game->particles[leftAndDown].particleType == EMPTY && 
+							 game->particles[leftAndDown].position.x - 1 > 0)
 					{
 						swapParticles(&game->particles[i], &game->particles[leftAndDown]);
 					}
-					else if (game->particles[rightAndDown].particleType == EMPTY)
+					else if (game->particles[rightAndDown].particleType == EMPTY &&
+							 game->particles[leftAndDown].position.x + 1 < game->width - 1)
 					{
 						swapParticles(&game->particles[i], &game->particles[rightAndDown]);
 					}
@@ -180,6 +182,19 @@ particle_t getEmpty(void)
 	return emptyParticle;
 }
 
+void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle)
+{
+	for (uint32_t y = 0; y < brushHeight; y += 2)
+	{
+		for (uint32_t x = 0; x < brushWidth; x += 2)
+		{
+			game->particles[(yPos + y) * game->width + (xPos + x)] = *particle;
+			game->particles[(yPos + y) * game->width + (xPos + x)].position.x = xPos + x;
+			game->particles[(yPos + y) * game->width + (xPos + x)].position.y = yPos + y;
+		}
+	}
+}
+
 static void fillParticles(game_t *game)
 {
 	for (int y = 0; y < game->height; y++)
@@ -189,22 +204,20 @@ static void fillParticles(game_t *game)
 			game->particles[y * game->width + x] = getEmpty();
 			game->particles[y * game->width + x].position.x = x;
 			game->particles[y * game->width + x].position.y = y;
-
 		}
 	}
 }
 
 static void swapParticles(particle_t *particle1, particle_t *particle2)
 {
-	particle_t temp;
-	temp.particleType = particle1->particleType;
-	temp.color = particle1->color;
+	enum type particleType = particle1->particleType;
+	color_t color = particle1->color;
 	
 	particle1->particleType = particle2->particleType;
 	particle1->color 		= particle2->color;
 
-	particle2->particleType = temp.particleType;
-	particle2->color 		= temp.color;
+	particle2->particleType = particleType;
+	particle2->color 		= color;
 
 	particle1->updated = true;
 	particle2->updated = true;

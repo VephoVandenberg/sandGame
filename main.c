@@ -11,9 +11,14 @@
 #define SCREEN_WIDTH 950
 #define SCREEN_HEIGHT 950
 
-static void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos);
+#define BRUSH_SIZE_X 4
+#define BRUSH_SIZE_Y 4
+
+void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos);
+void mouseClickCallback(GLFWwindow *window, int button, int action, int mods);
 
 game_t game;
+bool brushInUse;
 
 int main(int argc, char **argv)
 {
@@ -24,6 +29,7 @@ int main(int argc, char **argv)
 	}
 	GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sand Engine", NULL, NULL);
 	glfwSetCursorPosCallback(window, cursorPositionCallback);
+	glfwSetMouseButtonCallback(window, mouseClickCallback);
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
@@ -52,16 +58,37 @@ int main(int argc, char **argv)
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
-
 	}
 	return 0;
 }
 
-static void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos)
+void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos)
 {
-	particle_t sandParticle = getSand();
-	sandParticle.position.x = (uint32_t)xPos;
-	sandParticle.position.y = (uint32_t)yPos;
+	if (brushInUse)
+	{
+		uint32_t positionX = (uint32_t)xPos;
+		uint32_t positionY = (uint32_t)yPos;
 
-	game.particles[sandParticle.position.y * game.width + sandParticle.position.x] = sandParticle;
+		if (xPos - BRUSH_SIZE_X > 1.0f && positionX + BRUSH_SIZE_X < game.width &&
+			yPos - BRUSH_SIZE_Y > 1.0f && positionY + BRUSH_SIZE_Y < game.height)
+		{
+			particle_t sandParticle = getSand();
+			useBrush(&game, positionX, positionY, BRUSH_SIZE_X, BRUSH_SIZE_Y, &sandParticle);
+		}
+	}
+}
+
+void mouseClickCallback(GLFWwindow *window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
+	{
+		if (action == GLFW_PRESS)
+		{
+			brushInUse = true;
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			brushInUse = false;
+		}
+	}
 }
