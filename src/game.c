@@ -9,14 +9,16 @@ static color_t sandColor = {255, 224, 51};
 static uint32_t velocityY = 10;
 
 static void fillParticles(game_t *game);
+static void swapParticles(particle_t *particle1, particle_t *particle2);
 
 uint32_t colorToInt32(color_t *color);
 
 void screenClear(game_t *game, uint32_t color)
 {
-	for (size_t i = 0; i < game->width * game->height; i++)
+	for (uint32_t i = 0; i < game->numberOfParticles; i++)
 	{
 		game->data[i] = color;
+		game->particles[i].updated = false;
 	}
 }
 
@@ -26,8 +28,8 @@ void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight)
 	{
 		game->width 	= screenWidth;
 		game->height 	= screenHeight;
-		game->data 		= malloc(sizeof(uint32_t) * game->width * game->height);
 		game->numberOfParticles = game->width * game->height;
+		game->data 		= malloc(sizeof(uint32_t) * game->numberOfParticles);
 		game->particles = malloc(sizeof(particle_t) * game->numberOfParticles);
 		fillParticles(game);
 		screenClear(game, colorToInt32(&screenColor));
@@ -112,9 +114,32 @@ void updateParticles(game_t *game)
 	{
 		switch(game->particles[i].particleType)
 		{
+			case EMPTY:
+			{
+
+			}break;
+
 			case SAND:
 			{
-				
+				if (game->particles[i].position.y < game->height - 1 && !game->particles[i].updated)
+				{
+					uint32_t down = (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x;
+					uint32_t leftAndDown = (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x - 1;
+					uint32_t rightAndDown = (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x + 1;
+
+					if (game->particles[down].particleType == EMPTY)
+					{
+						swapParticles(&game->particles[i], &game->particles[down]);
+					}
+					else if (game->particles[leftAndDown].particleType == EMPTY)
+					{
+						swapParticles(&game->particles[i], &game->particles[leftAndDown]);
+					}
+					else if (game->particles[rightAndDown].particleType == EMPTY)
+					{
+						swapParticles(&game->particles[i], &game->particles[rightAndDown]);
+					}
+				}
 			}break;
 		}
 	}
@@ -127,8 +152,7 @@ particle_t getSand(void)
 	sandParticle.isSolid = false;
 	sandParticle.lifeSpan = -1.0f;
 	sandParticle.particleType = SAND;
-	color_t color = sandColor;
-	sandParticle.color = color;
+	sandParticle.color = sandColor;
 
 	return sandParticle;
 }
@@ -158,8 +182,30 @@ particle_t getEmpty(void)
 
 static void fillParticles(game_t *game)
 {
-	for (int i = 0; i < game->numberOfParticles; i++)
+	for (int y = 0; y < game->height; y++)
 	{
-		game->particles[i] = getEmpty();
-	}	
+		for (int x = 0; x < game->width; x++)
+		{
+			game->particles[y * game->width + x] = getEmpty();
+			game->particles[y * game->width + x].position.x = x;
+			game->particles[y * game->width + x].position.y = y;
+
+		}
+	}
+}
+
+static void swapParticles(particle_t *particle1, particle_t *particle2)
+{
+	particle_t temp;
+	temp.particleType = particle1->particleType;
+	temp.color = particle1->color;
+	
+	particle1->particleType = particle2->particleType;
+	particle1->color 		= particle2->color;
+
+	particle2->particleType = temp.particleType;
+	particle2->color 		= temp.color;
+
+	particle1->updated = true;
+	particle2->updated = true;
 }

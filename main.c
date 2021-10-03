@@ -62,4 +62,6 @@ static void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos)
 	particle_t sandParticle = getSand();
 	sandParticle.position.x = (uint32_t)xPos;
 	sandParticle.position.y = (uint32_t)yPos;
+
+	game.particles[sandParticle.position.y * game.width + sandParticle.position.x] = sandParticle;
 }
