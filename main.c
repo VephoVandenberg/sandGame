@@ -16,8 +16,10 @@
 
 void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos);
 void mouseClickCallback(GLFWwindow *window, int button, int action, int mods);
+void keyboardKeysCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
 game_t game;
+particle_t globalParticle;
 bool brushInUse;
 
 int main(int argc, char **argv)
@@ -28,8 +30,10 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sand Engine", NULL, NULL);
+	globalParticle = getSand();
 	glfwSetCursorPosCallback(window, cursorPositionCallback);
 	glfwSetMouseButtonCallback(window, mouseClickCallback);
+	glfwSetKeyCallback(window, keyboardKeysCallback);
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
@@ -49,7 +53,6 @@ int main(int argc, char **argv)
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 
-	
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
@@ -72,8 +75,7 @@ void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos)
 		if (xPos - BRUSH_SIZE_X > 1.0f && positionX + BRUSH_SIZE_X < game.width &&
 			yPos - BRUSH_SIZE_Y > 1.0f && positionY + BRUSH_SIZE_Y < game.height)
 		{
-			particle_t sandParticle = getSand();
-			useBrush(&game, positionX, positionY, BRUSH_SIZE_X, BRUSH_SIZE_Y, &sandParticle);
+			useBrush(&game, positionX, positionY, BRUSH_SIZE_X, BRUSH_SIZE_Y, &globalParticle);
 		}
 	}
 }
@@ -90,5 +92,32 @@ void mouseClickCallback(GLFWwindow *window, int button, int action, int mods)
 		{
 			brushInUse = false;
 		}
+	}
+}
+
+void keyboardKeysCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+	switch (key)
+	{
+		case GLFW_KEY_1:
+		{
+			if (action == GLFW_PRESS)
+			{
+				globalParticle = getSand();
+			}
+		}break;
+
+		case GLFW_KEY_2:
+		{
+			if (action == GLFW_PRESS)
+			{
+				globalParticle = getWater();
+			}
+		}break;
+
+		case GLFW_KEY_3:
+		{
+
+		}break;
 	}
 }

@@ -124,8 +124,39 @@ void updateParticles(game_t *game)
 				if (game->particles[i].position.y < game->height - 1 && !game->particles[i].updated)
 				{
 					uint32_t down = (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x;
+
 					uint32_t leftAndDown = (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x - 1;
 					uint32_t rightAndDown = (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x + 1;
+
+					if (game->particles[down].particleType == EMPTY ||
+						game->particles[down].particleType == WATER)
+					{
+						swapParticles(&game->particles[i], &game->particles[down]);
+					}
+					else if ((game->particles[leftAndDown].particleType == EMPTY || game->particles[leftAndDown].particleType == WATER) && 
+							 game->particles[leftAndDown].position.x - 1 > 0)
+					{
+						swapParticles(&game->particles[i], &game->particles[leftAndDown]);
+					}
+					else if ((game->particles[rightAndDown].particleType == EMPTY || game->particles[rightAndDown].particleType == WATER) &&
+							 game->particles[leftAndDown].position.x + 1 < game->width - 1)
+					{
+						swapParticles(&game->particles[i], &game->particles[rightAndDown]);
+					}
+				}
+			}break;
+
+			case WATER:
+			{
+				if (game->particles[i].position.y < game->height - 1 && !game->particles[i].updated)
+				{
+					uint32_t down = (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x;
+
+					uint32_t left 	= (game->particles[i].position.y) * game->width + game->particles[i].position.x - 1;
+					uint32_t right 	= (game->particles[i].position.y) * game->width + game->particles[i].position.x + 1;
+
+					uint32_t leftAndDown 	= (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x - 1;
+					uint32_t rightAndDown 	= (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x + 1;
 
 					if (game->particles[down].particleType == EMPTY)
 					{
@@ -140,6 +171,16 @@ void updateParticles(game_t *game)
 							 game->particles[leftAndDown].position.x + 1 < game->width - 1)
 					{
 						swapParticles(&game->particles[i], &game->particles[rightAndDown]);
+					}
+					else if (game->particles[left].particleType == EMPTY &&
+							 game->particles[left].position.x - 1 > 0)
+					{
+						swapParticles(&game->particles[i], &game->particles[left]);
+					}
+					else if (game->particles[right].particleType == EMPTY &&
+							 game->particles[right].position.x + 1 < game->width - 1)
+					{
+						swapParticles(&game->particles[i], &game->particles[right]);
 					}
 				}
 			}break;

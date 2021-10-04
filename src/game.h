@@ -26,7 +26,6 @@ typedef struct game
 void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight);
 void screenClear(game_t *game, uint32_t color);
 void render(game_t *game, float dt);
-void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle);
 
 void renderParticles(game_t *game);
 void updateParticles(game_t *game);
@@ -34,5 +33,6 @@ void updateParticles(game_t *game);
 particle_t getSand(void);
 particle_t getWater(void);
 particle_t getEmpty(void);
+void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle);
 
 #endif
