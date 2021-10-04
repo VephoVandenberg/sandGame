@@ -28,7 +28,7 @@ void screenClear(game_t *game, uint32_t color);
 void render(game_t *game, float dt);
 
 void renderParticles(game_t *game);
-void updateParticles(game_t *game);
+void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t width, uint32_t height);
 
 particle_t getSand(void);
 particle_t getWater(void);

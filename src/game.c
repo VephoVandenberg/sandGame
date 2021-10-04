@@ -94,7 +94,7 @@ uint32_t colorToInt32(color_t *color)
 void render(game_t *game, float dt)
 {
 	screenClear(game, colorToInt32(&screenColor));
-	updateParticles(game);
+	updateParticles(game->particles, game->numberOfParticles, game->width, game->height);
 	renderParticles(game);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, game->width, game->height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, game->data);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -108,81 +108,81 @@ void renderParticles(game_t *game)
 	}
 }
 
-void updateParticles(game_t *game)
+void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t width, uint32_t height)
 {
-	for (int i = 0; i < game->numberOfParticles; i++)
+	for (int i = 0; i < numberOfParticles; i++)
 	{
-		switch(game->particles[i].particleType)
+		switch(particles[i].particleType)
 		{
-			case EMPTY:
-			{
-
-			}break;
 
 			case SAND:
 			{
-				if (game->particles[i].position.y < game->height - 1 && !game->particles[i].updated)
+				if (particles[i].position.y < height - 1 && !particles[i].updated)
 				{
-					uint32_t down = (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x;
+					uint32_t down = (particles[i].position.y + 1) * width + particles[i].position.x;
 
-					uint32_t leftAndDown = (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x - 1;
-					uint32_t rightAndDown = (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x + 1;
+					uint32_t leftAndDown 	= (particles[i].position.y + 1) * width + particles[i].position.x - 1;
+					uint32_t rightAndDown 	= (particles[i].position.y + 1) * width + particles[i].position.x + 1;
 
-					if (game->particles[down].particleType == EMPTY ||
-						game->particles[down].particleType == WATER)
+					if (particles[down].particleType == EMPTY || particles[down].particleType == WATER)
 					{
-						swapParticles(&game->particles[i], &game->particles[down]);
+						swapParticles(&particles[i], &particles[down]);
 					}
-					else if ((game->particles[leftAndDown].particleType == EMPTY || game->particles[leftAndDown].particleType == WATER) && 
-							 game->particles[leftAndDown].position.x - 1 > 0)
+					else if ((particles[leftAndDown].particleType == EMPTY || particles[leftAndDown].particleType == WATER) && 
+							 particles[leftAndDown].position.x - 1 > 0)
 					{
-						swapParticles(&game->particles[i], &game->particles[leftAndDown]);
+						swapParticles(&particles[i], &particles[leftAndDown]);
 					}
-					else if ((game->particles[rightAndDown].particleType == EMPTY || game->particles[rightAndDown].particleType == WATER) &&
-							 game->particles[leftAndDown].position.x + 1 < game->width - 1)
+					else if ((particles[rightAndDown].particleType == EMPTY || particles[rightAndDown].particleType == WATER) &&
+							 particles[leftAndDown].position.x + 1 < width - 1)
 					{
-						swapParticles(&game->particles[i], &game->particles[rightAndDown]);
+						swapParticles(&particles[i], &particles[rightAndDown]);
 					}
 				}
 			}break;
 
 			case WATER:
 			{
-				if (game->particles[i].position.y < game->height - 1 && !game->particles[i].updated)
+				if (particles[i].position.y < height - 1 && !particles[i].updated)
 				{
-					uint32_t down = (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x;
+					uint32_t down = (particles[i].position.y + 1) * width + particles[i].position.x;
 
-					uint32_t left 	= (game->particles[i].position.y) * game->width + game->particles[i].position.x - 1;
-					uint32_t right 	= (game->particles[i].position.y) * game->width + game->particles[i].position.x + 1;
+					uint32_t left 	= (particles[i].position.y) * width + particles[i].position.x - 1;
+					uint32_t right 	= (particles[i].position.y) * width + particles[i].position.x + 1;
 
-					uint32_t leftAndDown 	= (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x - 1;
-					uint32_t rightAndDown 	= (game->particles[i].position.y + 1) * game->width + game->particles[i].position.x + 1;
+					uint32_t leftAndDown 	= (particles[i].position.y + 1) * width + particles[i].position.x - 1;
+					uint32_t rightAndDown 	= (particles[i].position.y + 1) * width + particles[i].position.x + 1;
 
-					if (game->particles[down].particleType == EMPTY)
+					if (particles[down].particleType == EMPTY)
 					{
-						swapParticles(&game->particles[i], &game->particles[down]);
+						swapParticles(&particles[i], &particles[down]);
 					}
-					else if (game->particles[leftAndDown].particleType == EMPTY && 
-							 game->particles[leftAndDown].position.x - 1 > 0)
+					else if (particles[leftAndDown].particleType == EMPTY && 
+							 particles[leftAndDown].position.x - 1 > 0)
 					{
-						swapParticles(&game->particles[i], &game->particles[leftAndDown]);
+						swapParticles(&particles[i], &particles[leftAndDown]);
 					}
-					else if (game->particles[rightAndDown].particleType == EMPTY &&
-							 game->particles[leftAndDown].position.x + 1 < game->width - 1)
+					else if (particles[rightAndDown].particleType == EMPTY &&
+							 particles[rightAndDown].position.x + 1 < width - 1)
 					{
-						swapParticles(&game->particles[i], &game->particles[rightAndDown]);
+						swapParticles(&particles[i], &particles[rightAndDown]);
 					}
-					else if (game->particles[left].particleType == EMPTY &&
-							 game->particles[left].position.x - 1 > 0)
+					else if (particles[left].particleType == EMPTY &&
+							 particles[left].position.x - 1 > 0)
 					{
-						swapParticles(&game->particles[i], &game->particles[left]);
+						swapParticles(&particles[i], &particles[left]);
 					}
-					else if (game->particles[right].particleType == EMPTY &&
-							 game->particles[right].position.x + 1 < game->width - 1)
+					else if (particles[right].particleType == EMPTY &&
+							 particles[right].position.x + 1 < width - 1)
 					{
-						swapParticles(&game->particles[i], &game->particles[right]);
+						swapParticles(&particles[i], &particles[right]);
 					}
 				}
+			}break;
+			
+			case EMPTY:
+			{
+
 			}break;
 		}
 	}

@@ -7,12 +7,13 @@
 #include "src/game.h"
 #include "src/shader.h"
 #include "src/particle.h"
+#include "src/math.h"
 
-#define SCREEN_WIDTH 950
-#define SCREEN_HEIGHT 950
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 800
 
-#define BRUSH_SIZE_X 4
-#define BRUSH_SIZE_Y 4
+#define BRUSH_SIZE_X 5
+#define BRUSH_SIZE_Y 5
 
 void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos);
 void mouseClickCallback(GLFWwindow *window, int button, int action, int mods);
@@ -20,6 +21,7 @@ void keyboardKeysCallback(GLFWwindow *window, int key, int scancode, int action,
 
 game_t game;
 particle_t globalParticle;
+vec2f_t mouseCoords;
 bool brushInUse;
 
 int main(int argc, char **argv)
@@ -57,6 +59,15 @@ int main(int argc, char **argv)
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
+		if (brushInUse)
+		{
+			if (mouseCoords.x - BRUSH_SIZE_X > 1.0f && mouseCoords.x + BRUSH_SIZE_X < game.width &&
+				mouseCoords.y - BRUSH_SIZE_Y > 1.0f && mouseCoords.y + BRUSH_SIZE_Y < game.height)
+			{
+				useBrush(&game, mouseCoords.x, mouseCoords.y, BRUSH_SIZE_X, BRUSH_SIZE_Y, &globalParticle);
+			}
+		}
+
 		render(&game, deltaTime);
 
 		glfwPollEvents();
@@ -67,17 +78,8 @@ int main(int argc, char **argv)
 
 void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos)
 {
-	if (brushInUse)
-	{
-		uint32_t positionX = (uint32_t)xPos;
-		uint32_t positionY = (uint32_t)yPos;
-
-		if (xPos - BRUSH_SIZE_X > 1.0f && positionX + BRUSH_SIZE_X < game.width &&
-			yPos - BRUSH_SIZE_Y > 1.0f && positionY + BRUSH_SIZE_Y < game.height)
-		{
-			useBrush(&game, positionX, positionY, BRUSH_SIZE_X, BRUSH_SIZE_Y, &globalParticle);
-		}
-	}
+	mouseCoords.x = xPos;
+	mouseCoords.y = yPos;
 }
 
 void mouseClickCallback(GLFWwindow *window, int button, int action, int mods)
