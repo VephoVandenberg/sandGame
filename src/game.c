@@ -4,7 +4,7 @@
 #include "game.h"
 #include "shader.h"
 
-#define GET_POSITION(x, y, width, height) (x >= 0 && x < width && y >= 0 && y <= height - 1) ? y * width + x : -1
+#define GET_POSITION(x, y, width, height) (x >= 0 && x <= width - 1 && y >= 0 && y <= height - 1) ? y * width + x : -1
 
 static color_t screenColor = {24, 26, 24};
 static color_t sandColor = {255, 224, 51};
@@ -165,13 +165,13 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						{
 							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
 						}
-						else if (particles[left].particleType == EMPTY)
-						{
-							swapParticles(&particles[particlePos], &particles[left], width, height);
-						}
 						else if (particles[right].particleType == EMPTY)
 						{
 							swapParticles(&particles[particlePos], &particles[right], width, height);
+						}
+						else if (particles[left].particleType == EMPTY)
+						{
+							swapParticles(&particles[particlePos], &particles[left], width, height);
 						}
 					}
 				}break;
