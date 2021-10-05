@@ -12,8 +12,8 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
 
-#define BRUSH_SIZE_X 5
-#define BRUSH_SIZE_Y 5
+#define BRUSH_SIZE_X 2
+#define BRUSH_SIZE_Y 2
 
 void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos);
 void mouseClickCallback(GLFWwindow *window, int button, int action, int mods);
