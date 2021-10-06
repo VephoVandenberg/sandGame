@@ -27,6 +27,7 @@ typedef struct particle
 	float lifeSpan;
 	color_t color;
 	vec2_t position;
+	vec2_t velocity;
 	enum type particleType;
 } particle_t;
 

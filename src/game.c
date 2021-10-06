@@ -9,7 +9,8 @@
 static color_t screenColor = {24, 26, 24};
 static color_t sandColor = {255, 224, 51};
 static color_t waterColor = {35, 137, 218};
-static uint32_t velocityY = 10;
+static vec2_t sandVelocity = {0, 4};
+static uint32_t gravityY = 3;
 
 static void fillParticles(game_t *game);
 static void swapParticles(particle_t *particle1, particle_t *particle2, uint32_t width, uint32_t height);
@@ -118,41 +119,34 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 		for (uint32_t x = 0; x < width; x++)
 		{
 			uint32_t particlePos = GET_POSITION(x, y, width, height);
+			if (particlePos == -1)
+			{
+				break;
+			}
 			switch(particles[particlePos].particleType)
 			{
 				case SAND:
 				{
-					if (!particles[particlePos].updated && y < height - 1)
-					{
-						uint32_t down 			= (y + 1) * width + x;
-						uint32_t leftAndDown  	= (y + 1) * width + x - 1;
-						uint32_t rightAndDown 	= (y + 1) * width + x + 1;
+					uint32_t down;
+					uint32_t leftAndDown;
+					uint32_t rightAndDown;
 
-						if (particles[down].particleType == EMPTY || particles[down].particleType == WATER)
+					particles[particlePos].velocity.y += gravityY;
+					for (uint32_t dVelocityY = 1; dVelocityY <= particles[particlePos].velocity.y &&  y + dVelocityY < height - 1; dVelocityY++)
+					{
+						down = (y + dVelocityY) * width + (x);
+
+						if (particles[(y + dVelocityY + 1) * width + x].particleType == SAND)
 						{
-							swapParticles(&particles[particlePos], &particles[down], width, height);
-						}
-						else if (particles[leftAndDown].particleType == EMPTY || particles[leftAndDown].particleType == WATER)
-						{
-							swapParticles(&particles[particlePos], &particles[leftAndDown], width, height);
-						}
-						else if (particles[rightAndDown].particleType == EMPTY || particles[rightAndDown].particleType == WATER)
-						{
-							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
+							leftAndDown = (y + dVelocityY) * width + (x - 1);
+							rightAndDown = (y + dVelocityY) * width + (x + 1);
+							// printf("%i\n", particles[particlePos].velocity.y);
+							break;
 						}
 					}
-				}break;
 
-				case WATER:
-				{
-					if (!particles[particlePos].updated && y < height - 1)
+					if (!particles[particlePos].updated)
 					{
-						uint32_t left 			= particlePos - 1;
-						uint32_t right 			= particlePos + 1;
-						uint32_t down 			= (y + 1) * width + x;
-						uint32_t leftAndDown  	= (y + 1) * width + (x - 1);
-						uint32_t rightAndDown 	= (y + 1) * width + (x + 1);
-
 						if (particles[down].particleType == EMPTY)
 						{
 							swapParticles(&particles[particlePos], &particles[down], width, height);
@@ -165,15 +159,12 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						{
 							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
 						}
-						else if (particles[right].particleType == EMPTY)
-						{
-							swapParticles(&particles[particlePos], &particles[right], width, height);
-						}
-						else if (particles[left].particleType == EMPTY)
-						{
-							swapParticles(&particles[particlePos], &particles[left], width, height);
-						}
 					}
+				}break;
+
+				case WATER:
+				{
+					
 				}break;
 
 				case EMPTY:
@@ -191,8 +182,9 @@ particle_t getSand(void)
 	sandParticle.isSolid = false;
 	sandParticle.lifeSpan = -1.0f;
 	sandParticle.particleType = SAND;
+	sandParticle.velocity.x = 0;
+	sandParticle.velocity.y = 7;
 	sandParticle.color = sandColor;
-
 	return sandParticle;
 }
 
@@ -249,14 +241,17 @@ static void swapParticles(particle_t *particle1, particle_t *particle2, uint32_t
 	if (particle1->position.x + 1 < width && particle1->position.x - 1 > 0 &&
 		particle2->position.x + 1 < width && particle2->position.x - 1 > 0)
 	{
-		enum type particleType = particle1->particleType;
-		color_t color = particle1->color;
+		enum type particleType	= particle1->particleType;
+		color_t color 			= particle1->color;
+		vec2_t velocity 		= particle1->velocity;
 		
 		particle1->particleType = particle2->particleType;
 		particle1->color 		= particle2->color;
+		particle1->velocity 	= particle2->velocity;
 
 		particle2->particleType = particleType;
 		particle2->color 		= color;
+		particle2->velocity 	= velocity;
 
 		particle1->updated = true;
 		particle2->updated = true;
