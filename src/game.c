@@ -124,7 +124,7 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 				{
 					if (!particles[particlePos].updated && y < height - 1)
 					{
-						uint32_t down 			= (y + 1) * width + x;
+						uint32_t down 		= (y + 1) * width + x;
 						uint32_t leftAndDown  	= (y + 1) * width + x - 1;
 						uint32_t rightAndDown 	= (y + 1) * width + x + 1;
 
@@ -253,10 +253,10 @@ static void swapParticles(particle_t *particle1, particle_t *particle2, uint32_t
 		color_t color = particle1->color;
 		
 		particle1->particleType = particle2->particleType;
-		particle1->color 		= particle2->color;
+		particle1->color 	= particle2->color;
 
 		particle2->particleType = particleType;
-		particle2->color 		= color;
+		particle2->color 	= color;
 
 		particle1->updated = true;
 		particle2->updated = true;
