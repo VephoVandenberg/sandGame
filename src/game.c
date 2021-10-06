@@ -134,7 +134,13 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 					particles[particlePos].velocity.y += gravityY;
 					for (uint32_t dVelocityY = 1; dVelocityY <= particles[particlePos].velocity.y &&  y + dVelocityY < height - 1; dVelocityY++)
 					{
+<<<<<<< HEAD
 						down = (y + dVelocityY) * width + (x);
+=======
+						uint32_t down 		= (y + 1) * width + x;
+						uint32_t leftAndDown  	= (y + 1) * width + x - 1;
+						uint32_t rightAndDown 	= (y + 1) * width + x + 1;
+>>>>>>> 308d133cea0c28f2bb0b9e95b34ca49a7be29d68
 
 						if (particles[(y + dVelocityY + 1) * width + x].particleType == SAND)
 						{
@@ -246,12 +252,19 @@ static void swapParticles(particle_t *particle1, particle_t *particle2, uint32_t
 		vec2_t velocity 		= particle1->velocity;
 		
 		particle1->particleType = particle2->particleType;
+<<<<<<< HEAD
 		particle1->color 		= particle2->color;
 		particle1->velocity 	= particle2->velocity;
 
 		particle2->particleType = particleType;
 		particle2->color 		= color;
 		particle2->velocity 	= velocity;
+=======
+		particle1->color 	= particle2->color;
+
+		particle2->particleType = particleType;
+		particle2->color 	= color;
+>>>>>>> 308d133cea0c28f2bb0b9e95b34ca49a7be29d68
 
 		particle1->updated = true;
 		particle2->updated = true;
