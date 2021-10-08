@@ -22,7 +22,6 @@ enum type
 
 typedef struct particle
 {
-	bool isSolid;
 	bool updated;
 	float lifeSpan;
 	color_t color;

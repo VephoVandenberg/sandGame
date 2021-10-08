@@ -6,11 +6,16 @@
 
 #define GET_POSITION(x, y, width, height) (x >= 0 && x <= width - 1 && y >= 0 && y <= height - 1) ? y * width + x : -1
 #define BROKEN_PIXEL_X 759
-static color_t screenColor = {24, 26, 24};
-static color_t sandColor = {255, 224, 51};
-static color_t waterColor = {35, 137, 218};
-static vec2_t sandVelocity = {0, 3};
-static vec2_t waterVelocity = {3, 3};
+
+static color_t screenColor = {24,  26,  24};
+static color_t sandColor   = {255, 224, 51};
+static color_t waterColor  = {35,  137, 218};
+static color_t smokeColor  = {230, 237, 232};
+ 
+static vec2_t sandVelocity 	= {0,  3};
+static vec2_t waterVelocity = {3,  3};
+static vec2_t smokeVelocity = {0, -2};
+
 static uint32_t gravityY = 2;
 
 static void fillParticles(game_t *game);
@@ -132,11 +137,8 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 					uint32_t leftAndDown;
 					uint32_t rightAndDown;
 
-					uint32_t dVelocityY;
-
 					particles[particlePos].velocity.y += gravityY;
-					for (dVelocityY = 1; dVelocityY <= particles[particlePos].velocity.y; 
-										 dVelocityY++)
+					for (uint32_t dVelocityY = 1; dVelocityY <= particles[particlePos].velocity.y; dVelocityY++)
 					{
 						down 		 = (y + dVelocityY) * width + (x);
 						leftAndDown  = (y + dVelocityY) * width + (x - 1);
@@ -144,7 +146,7 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						
 						if (y + dVelocityY >= height - 1)
 						{
-							down = (height - 1) * width + (x);
+							down 		 = (height - 1) * width + (x);
 							leftAndDown  = (height - 1) * width + (x - 1);
 							rightAndDown = (height - 1) * width + (x + 1);
 							break;
@@ -186,10 +188,8 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 					uint32_t leftAndDown;
 					uint32_t rightAndDown;
 
-					uint32_t dVelocityY;
-
 					particles[particlePos].velocity.y += gravityY;
-					for (dVelocityY = 1; dVelocityY < particles[particlePos].velocity.y; dVelocityY++)
+					for (uint32_t dVelocityY = 1; dVelocityY < particles[particlePos].velocity.y; dVelocityY++)
 					{
 					
 						down 		 = (y + dVelocityY) * width + (x);
@@ -198,7 +198,7 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						
 						if (y + dVelocityY >= height - 1)
 						{
-							down = (height - 1) * width + (x);
+							down 		 = (height - 1) * width + (x);
 							leftAndDown  = (height - 1) * width + (x - 1);
 							rightAndDown = (height - 1) * width + (x + 1);
 							break;
@@ -248,11 +248,15 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						{
 							swapParticles(&particles[particlePos], &particles[down], width, height);
 						}
-						else if (particles[leftAndDown].particleType == EMPTY && y + 1 < height - 1)
+						else if (particles[leftAndDown].particleType == EMPTY &&
+								 y + 1 < height - 1 &&
+								 x - 1 > 0)
 						{
 							swapParticles(&particles[particlePos], &particles[leftAndDown], width, height);
 						}
-						else if (particles[rightAndDown].particleType == EMPTY && y + 1 < height + 1)
+						else if (particles[rightAndDown].particleType == EMPTY &&
+								 y + 1 < height - 1 &&
+								 x + 1 < width - 1)
 						{
 							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
 						}
@@ -263,6 +267,54 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						else if (particles[left].particleType == EMPTY)
 						{
 							swapParticles(&particles[particlePos], &particles[left], width, height);
+						}
+					}
+				}break;
+
+				case SMOKE:
+				{
+					uint32_t up;
+					uint32_t leftAndUp;
+					uint32_t rightAndUp;
+
+					for (uint32_t dVelocityY = -1; dVelocityY >= particles[particlePos].velocity.y; dVelocityY--)
+					{
+						up  		= (y + dVelocityY) * width + (x);
+						leftAndUp 	= (y + dVelocityY) * width + (x - 1);
+						rightAndUp 	= (y + dVelocityY) * width + (x + 1);
+
+						if (y + dVelocityY <= 0)
+						{
+							up  		= (1) * width + (x);
+							leftAndUp 	= (1) * width + (x - 1);
+							rightAndUp 	= (1) * width + (x + 1);
+							break;
+						}
+
+						if (particles[(y + dVelocityY - 1) * width + (x)].particleType == SMOKE)
+						{
+							break;
+						}
+						else if (particles[(y + dVelocityY - 1) * width + (x)].particleType == WATER)
+						{	
+							up = (y + dVelocityY - 1) * width + (x);
+							break;
+						}
+					}
+
+					if (!particles[particlePos].updated)
+					{
+						if (particles[up].particleType != SMOKE)
+						{
+							swapParticles(&particles[particlePos], &particles[up], width, height);
+						}
+						else if (particles[leftAndUp].particleType != SMOKE && y - 1 > 0)
+						{
+							swapParticles(&particles[particlePos], &particles[leftAndUp], width, height);
+						}
+						else if (particles[rightAndUp].particleType != SMOKE && y - 1 > 0)
+						{
+							swapParticles(&particles[particlePos], &particles[rightAndUp], width, height);
 						}
 					}
 				}break;
@@ -279,7 +331,6 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 particle_t getSand(void)
 {
 	particle_t sandParticle;
-	sandParticle.isSolid = false;
 	sandParticle.lifeSpan = -1.0f;
 	sandParticle.particleType = SAND;
 	sandParticle.velocity = sandVelocity;
@@ -290,7 +341,6 @@ particle_t getSand(void)
 particle_t getWater(void)
 {
 	particle_t waterParticle;
-	waterParticle.isSolid = false;
 	waterParticle.lifeSpan = -1.0f;
 	waterParticle.particleType = WATER;
 	waterParticle.velocity = waterVelocity;
@@ -299,16 +349,27 @@ particle_t getWater(void)
 	return waterParticle;
 }
 
+particle_t getSmoke(void)
+{
+	particle_t smokeParticle;
+	smokeParticle.lifeSpan = -1.0f;
+	smokeParticle.particleType = SMOKE;
+	smokeParticle.velocity = smokeVelocity;
+	smokeParticle.color = smokeColor;
+
+	return smokeParticle;
+}
+
 particle_t getEmpty(void)
 {
 	particle_t emptyParticle;
-	emptyParticle.isSolid = false;
 	emptyParticle.lifeSpan = -1.0f;
 	emptyParticle.particleType = EMPTY;
 	emptyParticle.color = screenColor;
 
 	return emptyParticle;
 }
+
 
 void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle)
 {
@@ -322,6 +383,7 @@ void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, u
 		}
 	}
 }
+
 
 static void fillParticles(game_t *game)
 {
@@ -338,10 +400,9 @@ static void fillParticles(game_t *game)
 
 static void swapParticles(particle_t *particle1, particle_t *particle2, uint32_t width, uint32_t height)
 {
-	if (particle1->position.x + 1 < width && particle1->position.x - 1 > 0 &&
-		particle2->position.x + 1 < width && particle2->position.x - 1 > 0)
+	if (particle1->position.x + 1 < width - 1 && particle1->position.x - 1 >= 0 &&
+		particle2->position.x + 1 < width - 1 && particle2->position.x - 1 >= 0)
 	{
-
 		enum type particleType	= particle1->particleType;
 		color_t color 			= particle1->color;
 		vec2_t velocity 		= particle1->velocity;

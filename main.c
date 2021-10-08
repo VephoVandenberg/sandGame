@@ -119,7 +119,10 @@ void keyboardKeysCallback(GLFWwindow *window, int key, int scancode, int action,
 
 		case GLFW_KEY_3:
 		{
-
+			if (action == GLFW_PRESS)
+			{
+				globalParticle = getSmoke();
+			}
 		}break;
 	}
 }

@@ -3,8 +3,8 @@
 
 typedef struct vec2
 {
-	uint32_t x;
-	uint32_t y;
+	int32_t x;
+	int32_t y;
 } vec2_t;
 
 typedef struct vec2f
