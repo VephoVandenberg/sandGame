@@ -181,10 +181,8 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						{
 							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
 						}
-						else
-						{
-							particles[particlePos].velocity = sandVelocity;
-						}
+						particles[particlePos].velocity = sandVelocity;
+						
 					}
 				}break;
 
@@ -402,9 +400,12 @@ void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, u
 	{
 		for (uint32_t x = 0; x < brushWidth; x++)
 		{
-			game->particles[(yPos + y) * game->width + (xPos + x)] = *particle;
-			game->particles[(yPos + y) * game->width + (xPos + x)].position.x = xPos + x;
-			game->particles[(yPos + y) * game->width + (xPos + x)].position.y = yPos + y;
+			if (game->particles[(yPos + y) * game->width + (xPos + x)].particleType == EMPTY)
+			{
+				game->particles[(yPos + y) * game->width + (xPos + x)] = *particle;
+				game->particles[(yPos + y) * game->width + (xPos + x)].position.x = xPos + x;
+				game->particles[(yPos + y) * game->width + (xPos + x)].position.y = yPos + y;
+			}
 		}
 	}
 }
