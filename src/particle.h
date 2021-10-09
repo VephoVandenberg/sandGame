@@ -24,6 +24,7 @@ typedef struct particle
 {
 	bool updated;
 	bool isSolid;
+	bool isFloating;
 	float lifeSpan;
 	color_t color;
 	vec2_t position;

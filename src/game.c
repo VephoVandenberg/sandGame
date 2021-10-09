@@ -13,8 +13,8 @@ static color_t waterColor  	= {35,  137, 218};
 static color_t smokeColor  	= {230, 237, 232};
 static color_t woodColor 	= {133, 94,  66};
  
-static vec2_t sandVelocity 	= {0,  2};
-static vec2_t waterVelocity = {3,  2};
+static vec2_t sandVelocity 	= {0,  5};
+static vec2_t waterVelocity = {3,  5};
 static vec2_t smokeVelocity = {0, -2};
 
 static uint32_t gravityY = 1;
@@ -167,22 +167,25 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 
 					if (!particles[particlePos].updated)
 					{
-						if (particles[down].particleType == EMPTY || particles[down].particleType == WATER)
+						if ((particles[down].particleType == EMPTY || particles[down].particleType == WATER) && 
+							 !particles[down].updated)
 						{
 							swapParticles(&particles[particlePos], &particles[down], width, height);
 						}
 						else if ((particles[leftAndDown].particleType == EMPTY || particles[leftAndDown].particleType == WATER) && 
-								  y + 1 < height - 1)
+								  y + 1 < height - 1 &&
+								  x - 1 > 0)
 						{
+							particles[particlePos].velocity.y = sandVelocity.y;
 							swapParticles(&particles[particlePos], &particles[leftAndDown], width, height);
 						}
 						else if ((particles[rightAndDown].particleType == EMPTY || particles[rightAndDown].particleType == WATER) && 
-							     y + 1 < height - 1)
+							     y + 1 < height - 1 &&
+							     x + 1 < width - 1)
 						{
+							particles[particlePos].velocity.y = sandVelocity.y;
 							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
 						}
-						particles[particlePos].velocity = sandVelocity;
-						
 					}
 				}break;
 
@@ -216,7 +219,6 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						{
 							break;
 						}
-
 					}
 
 
@@ -227,13 +229,13 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 
 						if (x - dVelocityX <= 0)
 						{
-							left = (y) * width + (dVelocityX / 2);
+							left = (y) * width + 1;
 							break;
 						}
 
 						if (x + dVelocityX >= width - 1)
 						{
-							right = (y) * width + (width - dVelocityX / 2);
+							right = (y) * width + (width - 1);
 							break;
 						}
 
@@ -248,7 +250,7 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 
 					if (!particles[particlePos].updated)
 					{
-						if (particles[down].particleType == EMPTY)
+						if (particles[down].particleType == EMPTY && !particles[down].updated)
 						{
 							swapParticles(&particles[particlePos], &particles[down], width, height);
 						}
@@ -256,26 +258,27 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 								 y + 1 < height - 1 &&
 								 x - 1 > 0)
 						{
+							particles[particlePos].velocity = waterVelocity;
 							swapParticles(&particles[particlePos], &particles[leftAndDown], width, height);
+							particles[particlePos].updated = false;
 						}
 						else if (particles[rightAndDown].particleType == EMPTY &&
 								 y + 1 < height - 1 &&
 								 x + 1 < width - 1)
 						{
+							particles[particlePos].velocity = waterVelocity;
 							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
+							particles[particlePos].updated = false;
 						}
-						else if (particles[right].particleType == EMPTY)
+						else if (particles[right].particleType == EMPTY && particles[down].particleType != EMPTY)
 						{
 							swapParticles(&particles[particlePos], &particles[right], width, height);
 						}
-						else if (particles[left].particleType == EMPTY)
+						else if (particles[left].particleType == EMPTY && particles[down].particleType != EMPTY)
 						{
 							swapParticles(&particles[particlePos], &particles[left], width, height);
 						}
-						else
-						{
-							particles[particlePos].velocity = waterVelocity;
-						}
+
 					}
 				}break;
 
@@ -312,15 +315,15 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 
 					if (!particles[particlePos].updated)
 					{
-						if (particles[up].particleType != SMOKE && particles[up].particleType != WOOD)
+						if (particles[up].particleType != SMOKE && particles[up].particleType != WOOD && particles[up].particleType != SAND)
 						{
 							swapParticles(&particles[particlePos], &particles[up], width, height);
 						}
-						else if ((particles[leftAndUp].particleType != SMOKE && particles[up].particleType != WOOD) && y - 1 > 0)
+						else if ((particles[leftAndUp].particleType != SMOKE && particles[up].particleType != WOOD  && particles[up].particleType != SAND) && y - 1 > 0)
 						{
 							swapParticles(&particles[particlePos], &particles[leftAndUp], width, height);
 						}
-						else if ((particles[rightAndUp].particleType != SMOKE && particles[up].particleType != WOOD) && y - 1 > 0)
+						else if ((particles[rightAndUp].particleType != SMOKE && particles[up].particleType != WOOD && particles[up].particleType != SAND) && y - 1 > 0)
 						{
 							swapParticles(&particles[particlePos], &particles[rightAndUp], width, height);
 						}
