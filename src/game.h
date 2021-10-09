@@ -34,6 +34,7 @@ particle_t getSand(void);
 particle_t getWater(void);
 particle_t getEmpty(void);
 particle_t getSmoke(void);
+particle_t getWood(void);
 
 void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle);
 
