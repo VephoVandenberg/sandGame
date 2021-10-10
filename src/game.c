@@ -154,13 +154,9 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						}
 						
 						if (particles[(y + dVelocityY + 1) * width + (x)].particleType == SAND || 
-							particles[(y + dVelocityY + 1) * width + (x)].particleType == WOOD)
+							particles[(y + dVelocityY + 1) * width + (x)].particleType == WOOD ||
+							particles[(y + dVelocityY + 1) * width + (x)].particleType == WATER)
 						{
-							break;
-						}
-						else if (particles[(y + dVelocityY + 1) * width + (x)].particleType == WATER)
-						{	
-							down = (y + dVelocityY - 1) * width + (x);
 							break;
 						}
 					}
@@ -260,7 +256,6 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						{
 							particles[particlePos].velocity = waterVelocity;
 							swapParticles(&particles[particlePos], &particles[leftAndDown], width, height);
-							particles[particlePos].updated = false;
 						}
 						else if (particles[rightAndDown].particleType == EMPTY &&
 								 y + 1 < height - 1 &&
@@ -268,7 +263,6 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						{
 							particles[particlePos].velocity = waterVelocity;
 							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
-							particles[particlePos].updated = false;
 						}
 						else if (particles[right].particleType == EMPTY && particles[down].particleType != EMPTY)
 						{
