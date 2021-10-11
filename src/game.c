@@ -12,6 +12,7 @@ static color_t sandColor   	= {255, 224, 51};
 static color_t waterColor  	= {35,  137, 218};
 static color_t smokeColor  	= {230, 237, 232};
 static color_t woodColor 	= {133, 94,  66};
+static color_t fireColor 	= {255, 72,  0};
  
 static vec2_t sandVelocity 	= {0,  5};
 static vec2_t waterVelocity = {3,  5};
@@ -105,7 +106,7 @@ uint32_t colorToInt32(color_t *color)
 void render(game_t *game, float dt)
 {
 	screenClear(game, colorToInt32(&screenColor));
-	updateParticles(game->particles, game->numberOfParticles, game->width, game->height);
+	updateParticles(game->particles, game->numberOfParticles, game->width, game->height, dt);
 	renderParticles(game);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, game->width, game->height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, game->data);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -119,133 +120,126 @@ void renderParticles(game_t *game)
 	}
 }
 
-void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t width, uint32_t height)
+void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t width, uint32_t height, float dt)
 {
 	for (uint32_t y = height - 1; y > 0; y--)
 	{
 		for (uint32_t x = 0; x < width; x++)
 		{
+			uint32_t down;
+			uint32_t left;
+			uint32_t right;
+			uint32_t leftAndDown;
+			uint32_t rightAndDown;
+
+			uint32_t up;
+			uint32_t leftAndUp;
+			uint32_t rightAndUp;
+
 			uint32_t particlePos = GET_POSITION(x, y, width, height);
-			if (particlePos == -1)
+
+			if (!particles[particlePos].updated)
 			{
-				break;
-			}
-			switch(particles[particlePos].particleType)
-			{
-				case SAND:
+				switch(particles[particlePos].particleType)
 				{
-					uint32_t down;
-					uint32_t leftAndDown;
-					uint32_t rightAndDown;
-
-					particles[particlePos].velocity.y += gravityY;
-					for (uint32_t dVelocityY = 1; dVelocityY <= particles[particlePos].velocity.y; dVelocityY++)
+					case SAND:
 					{
-						down 		 = (y + dVelocityY) * width + (x);
-						leftAndDown  = (y + dVelocityY) * width + (x - 1);
-						rightAndDown = (y + dVelocityY) * width + (x + 1);
-						
-						if (y + dVelocityY >= height - 1)
+						particles[particlePos].velocity.y += gravityY;
+						for (uint32_t dVelocityY = 1; dVelocityY <= particles[particlePos].velocity.y; dVelocityY++)
 						{
-							down 		 = (height - 1) * width + (x);
-							leftAndDown  = (height - 1) * width + (x - 1);
-							rightAndDown = (height - 1) * width + (x + 1);
-							break;
+							down 		 = (y + dVelocityY) * width + (x);
+							leftAndDown  = (y + dVelocityY) * width + (x - 1);
+							rightAndDown = (y + dVelocityY) * width + (x + 1);
+							
+							if (y + dVelocityY >= height - 1)
+							{
+								down 		 = (height - 1) * width + (x);
+								leftAndDown  = (height - 1) * width + (x - 1);
+								rightAndDown = (height - 1) * width + (x + 1);
+								break;
+							}
+							
+							if (particles[(y + dVelocityY + 1) * width + (x)].particleType == SAND || 
+								particles[(y + dVelocityY + 1) * width + (x)].particleType == WOOD ||
+								particles[(y + dVelocityY + 1) * width + (x)].particleType == WATER)
+							{
+								break;
+							}
 						}
-						
-						if (particles[(y + dVelocityY + 1) * width + (x)].particleType == SAND || 
-							particles[(y + dVelocityY + 1) * width + (x)].particleType == WOOD ||
-							particles[(y + dVelocityY + 1) * width + (x)].particleType == WATER)
-						{
-							break;
-						}
-					}
 
-					if (!particles[particlePos].updated)
-					{
-						if ((particles[down].particleType == EMPTY || particles[down].particleType == WATER) && 
-							 !particles[down].updated)
+						if (!particles[down].isSolid && 
+							!particles[down].updated)
 						{
 							swapParticles(&particles[particlePos], &particles[down], width, height);
 						}
-						else if ((particles[leftAndDown].particleType == EMPTY || particles[leftAndDown].particleType == WATER) && 
+						else if (!particles[leftAndDown].isSolid && 
 								  y + 1 < height - 1 &&
 								  x - 1 > 0)
 						{
 							particles[particlePos].velocity.y = sandVelocity.y;
 							swapParticles(&particles[particlePos], &particles[leftAndDown], width, height);
 						}
-						else if ((particles[rightAndDown].particleType == EMPTY || particles[rightAndDown].particleType == WATER) && 
+						else if (!particles[rightAndDown].isSolid && 
 							     y + 1 < height - 1 &&
 							     x + 1 < width - 1)
 						{
 							particles[particlePos].velocity.y = sandVelocity.y;
 							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
 						}
-					}
-				}break;
+					}break;
 
-				case WATER:
-				{
-					uint32_t down;
-					uint32_t left;
-					uint32_t right;
-					uint32_t leftAndDown;
-					uint32_t rightAndDown;
-
-					particles[particlePos].velocity.y += gravityY;
-					for (uint32_t dVelocityY = 1; dVelocityY < particles[particlePos].velocity.y; dVelocityY++)
+					case WATER:
 					{
-					
-						down 		 = (y + dVelocityY) * width + (x);
-						leftAndDown  = (y + dVelocityY) * width + (x - 1);
-						rightAndDown = (y + dVelocityY) * width + (x + 1);
+						particles[particlePos].velocity.y += gravityY;
+						for (uint32_t dVelocityY = 1; dVelocityY < particles[particlePos].velocity.y; dVelocityY++)
+						{
 						
-						if (y + dVelocityY >= height - 1)
-						{
-							down 		 = (height - 1) * width + (x);
-							leftAndDown  = (height - 1) * width + (x - 1);
-							rightAndDown = (height - 1) * width + (x + 1);
-							break;
-						}
-						
-						if (particles[(y + dVelocityY + 1) * width + (x)].particleType == SAND  ||
-							particles[(y + dVelocityY + 1) * width + (x)].particleType == WATER ||
-							particles[(y + dVelocityY + 1) * width + (x)].particleType == WOOD)
-						{
-							break;
-						}
-					}
-
-
-					for (uint32_t dVelocityX = 1; dVelocityX <= particles[particlePos].velocity.x; dVelocityX+=2)
-					{
-						left  = particlePos - dVelocityX;
-						right = particlePos + dVelocityX;
-
-						if (x - dVelocityX <= 0)
-						{
-							left = (y) * width + 1;
-							break;
+							down 		 = (y + dVelocityY) * width + (x);
+							leftAndDown  = (y + dVelocityY) * width + (x - 1);
+							rightAndDown = (y + dVelocityY) * width + (x + 1);
+							
+							if (y + dVelocityY >= height - 1)
+							{
+								down 		 = (height - 1) * width + (x);
+								leftAndDown  = (height - 1) * width + (x - 1);
+								rightAndDown = (height - 1) * width + (x + 1);
+								break;
+							}
+							
+							if (particles[(y + dVelocityY + 1) * width + (x)].particleType == SAND  ||
+								particles[(y + dVelocityY + 1) * width + (x)].particleType == WATER ||
+								particles[(y + dVelocityY + 1) * width + (x)].particleType == WOOD)
+							{
+								break;
+							}
 						}
 
-						if (x + dVelocityX >= width - 1)
-						{
-							right = (y) * width + (width - 1);
-							break;
-						}
 
-						if (particles[left - 1].particleType == SAND  ||
-							particles[left - 1].particleType == WOOD  ||
-							particles[right + 1].particleType == SAND || 
-							particles[right + 1].particleType == WOOD)
+						for (uint32_t dVelocityX = 1; dVelocityX <= particles[particlePos].velocity.x; dVelocityX+=2)
 						{
-							break;
-						}
-					}
+							left  = particlePos - dVelocityX;
+							right = particlePos + dVelocityX;
 
-					if (!particles[particlePos].updated)
-					{
+							if (x - dVelocityX <= 0)
+							{
+								left = (y) * width + 1;
+								break;
+							}
+
+							if (x + dVelocityX >= width - 1)
+							{
+								right = (y) * width + (width - 1);
+								break;
+							}
+
+							if (particles[left - 1].particleType == SAND  ||
+								particles[left - 1].particleType == WOOD  ||
+								particles[right + 1].particleType == SAND || 
+								particles[right + 1].particleType == WOOD)
+							{
+								break;
+							}
+						}
 						if (particles[down].particleType == EMPTY && !particles[down].updated)
 						{
 							swapParticles(&particles[particlePos], &particles[down], width, height);
@@ -272,67 +266,145 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						{
 							swapParticles(&particles[particlePos], &particles[left], width, height);
 						}
+					}break;
 
-					}
-				}break;
-
-				case SMOKE:
-				{
-					uint32_t up;
-					uint32_t leftAndUp;
-					uint32_t rightAndUp;
-
-					for (uint32_t dVelocityY = -1; dVelocityY >= particles[particlePos].velocity.y; dVelocityY--)
+					case SMOKE:
 					{
-						up  		= (y + dVelocityY) * width + (x);
-						leftAndUp 	= (y + dVelocityY) * width + (x - 1);
-						rightAndUp 	= (y + dVelocityY) * width + (x + 1);
-
-						if (y + dVelocityY <= 0)
+						for (uint32_t dVelocityY = -1; dVelocityY >= particles[particlePos].velocity.y; dVelocityY--)
 						{
-							up  		= (1) * width + (x);
-							leftAndUp 	= (1) * width + (x - 1);
-							rightAndUp 	= (1) * width + (x + 1);
-							break;
+							up  		= (y + dVelocityY) * width + (x);
+							leftAndUp 	= (y + dVelocityY) * width + (x - 1);
+							rightAndUp 	= (y + dVelocityY) * width + (x + 1);
+
+							if (y + dVelocityY <= 0)
+							{
+								up  		= (1) * width + (x);
+								leftAndUp 	= (1) * width + (x - 1);
+								rightAndUp 	= (1) * width + (x + 1);
+								break;
+							}
+
+							if (particles[(y + dVelocityY - 1) * width + (x)].particleType == SMOKE)
+							{
+								break;
+							}	
+							else if (particles[(y + dVelocityY - 1) * width + (x)].particleType == WATER)
+							{	
+								up = (y + dVelocityY - 1) * width + (x);
+								break;
+							}
 						}
 
-						if (particles[(y + dVelocityY - 1) * width + (x)].particleType == SMOKE)
-						{
-							break;
-						}	
-						else if (particles[(y + dVelocityY - 1) * width + (x)].particleType == WATER)
-						{	
-							up = (y + dVelocityY - 1) * width + (x);
-							break;
-						}
-					}
-
-					if (!particles[particlePos].updated)
-					{
-						if (particles[up].particleType != SMOKE && particles[up].particleType != WOOD && particles[up].particleType != SAND)
+						if (particles[up].particleType != SMOKE && 
+							particles[up].particleType != WOOD && 
+							particles[up].particleType != SAND)
 						{
 							swapParticles(&particles[particlePos], &particles[up], width, height);
 						}
-						else if ((particles[leftAndUp].particleType != SMOKE && particles[up].particleType != WOOD  && particles[up].particleType != SAND) && y - 1 > 0)
+						else if ((particles[leftAndUp].particleType != SMOKE && 
+								  particles[up].particleType != WOOD  && 
+								  particles[up].particleType != SAND) && 
+								  y - 1 > 0)
 						{
 							swapParticles(&particles[particlePos], &particles[leftAndUp], width, height);
 						}
-						else if ((particles[rightAndUp].particleType != SMOKE && particles[up].particleType != WOOD && particles[up].particleType != SAND) && y - 1 > 0)
+						else if ((particles[rightAndUp].particleType != SMOKE && 
+								  particles[up].particleType != WOOD && 
+								  particles[up].particleType != SAND) && 
+								  y - 1 > 0)
 						{
 							swapParticles(&particles[particlePos], &particles[rightAndUp], width, height);
 						}
-					}
-				}break;
+					}break;
 
-				case WOOD:
-				{
+					case FIRE:
+					{
+						down 			= (y + 1) * width + (x);
+						up 				= (y - 1) * width + (x);
+						leftAndDown 	= (y + 1) * width + (x - 1);
+						rightAndDown	= (y + 1) * width + (x + 1);
+						leftAndUp 		= (y - 1) * width + (x - 1);
+						rightAndUp 		= (y - 1) * width + (x + 1);
+						left 			= (y) * width + (x - 1);
+						right 			= (y) * width + (x + 1);
 
-				}break;
+						particles[particlePos].lifeSpan -= dt;
+						if (particles[particlePos].lifeSpan > 0.0f)
+						{
+							if (particles[particlePos].lifeSpan < 9.0f)
+							{
+								if (y + 1 < height - 1 && y - 1 > 0 &&
+									x + 1 < width  - 1 && x - 1 > 0)
+								{
+									if (particles[down].particleType == WOOD)
+									{
+										particles[down] = getFire();
+										particles[down].position.y = y + 1;
+										particles[down].position.x = x;
+									}
+									else if (particles[up].particleType == WOOD)
+									{
+										particles[up] = getFire();
+										particles[up].position.y = y - 1;
+										particles[up].position.x = x;
+									}
+									else if (particles[leftAndDown].particleType == WOOD)
+									{
+										particles[leftAndDown] = getFire();
+										particles[leftAndDown].position.y = y + 1;
+										particles[leftAndDown].position.x = x - 1;
+									}
+									else if (particles[rightAndDown].particleType == WOOD)
+									{
+										particles[rightAndDown] = getFire();
+										particles[rightAndDown].position.y = y + 1;
+										particles[rightAndDown].position.x = x + 1;
+									}
+									else if (particles[leftAndUp].particleType == WOOD)
+									{
+										particles[leftAndUp] = getFire();
+										particles[leftAndUp].position.y = y - 1;
+										particles[leftAndUp].position.x = x - 1;
+									}
+									else if (particles[rightAndUp].particleType == WOOD)
+									{
+										particles[rightAndUp] = getFire();
+										particles[rightAndUp].position.y = y - 1;
+										particles[rightAndUp].position.x = x + 1;
+									}
+									else if (particles[left].particleType == WOOD)
+									{
+										particles[left] = getFire();
+										particles[left].position.y = y;
+										particles[left].position.x = x - 1;
+									}
+									else if (particles[right].particleType == WOOD)
+									{
+										particles[right] = getFire();
+										particles[right].position.y = y;
+										particles[right].position.x = x + 1;
+									}
+								}
+							}
+						}
+						else
+						{
+							particles[particlePos] = getSmoke();
+							particles[particlePos].position.x = x;
+							particles[particlePos].position.y = y;
+						}
+					}break;
 
-				case EMPTY:
-				{
+					case WOOD:
+					{
 
-				}break;
+					}break;
+
+					case EMPTY:
+					{
+
+					}break;
+				}
 			}
 		}
 	}
@@ -342,6 +414,7 @@ particle_t getSand(void)
 {
 	particle_t sandParticle;
 	sandParticle.lifeSpan = -1.0f;
+	sandParticle.isSolid = true;
 	sandParticle.particleType = SAND;
 	sandParticle.velocity = sandVelocity;
 	sandParticle.color = sandColor;
@@ -352,6 +425,7 @@ particle_t getWater(void)
 {
 	particle_t waterParticle;
 	waterParticle.lifeSpan = -1.0f;
+	waterParticle.isSolid = false;
 	waterParticle.particleType = WATER;
 	waterParticle.velocity = waterVelocity;
 	waterParticle.color = waterColor;
@@ -363,6 +437,7 @@ particle_t getSmoke(void)
 {
 	particle_t smokeParticle;
 	smokeParticle.lifeSpan = -1.0f;
+	smokeParticle.isSolid = false;
 	smokeParticle.particleType = SMOKE;
 	smokeParticle.velocity = smokeVelocity;
 	smokeParticle.color = smokeColor;
@@ -374,6 +449,7 @@ particle_t getWood(void)
 {
 	particle_t woodParticle;
 	woodParticle.lifeSpan = -1.0f;
+	woodParticle.isSolid = true;
 	woodParticle.particleType = WOOD;
 	woodParticle.color = woodColor;
 
@@ -384,12 +460,23 @@ particle_t getEmpty(void)
 {
 	particle_t emptyParticle;
 	emptyParticle.lifeSpan = -1.0f;
+	emptyParticle.isSolid = false;
 	emptyParticle.particleType = EMPTY;
 	emptyParticle.color = screenColor;
 
 	return emptyParticle;
 }
 
+particle_t getFire(void)
+{
+	particle_t fireParticle;
+	fireParticle.lifeSpan = 10.0f;
+	fireParticle.isSolid = false;
+	fireParticle.particleType = FIRE;
+	fireParticle.color = fireColor;
+
+	return fireParticle;
+}
 
 void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle)
 {
@@ -429,18 +516,19 @@ static void swapParticles(particle_t *particle1, particle_t *particle2, uint32_t
 		enum type particleType	= particle1->particleType;
 		color_t color 			= particle1->color;
 		vec2_t velocity 		= particle1->velocity;
+		bool isSolid 			= particle1->isSolid;
 		
 		particle1->particleType = particle2->particleType;
 		particle1->color 		= particle2->color;
 		particle1->velocity 	= particle2->velocity;
+		particle1->isSolid 		= particle2->isSolid;
 
 		particle2->particleType = particleType;
 		particle2->color 		= color;
 		particle2->velocity 	= velocity;
+		particle2->isSolid  	= isSolid;
 
 		particle1->updated = true;
 		particle2->updated = true;
-
-
 	}
 }

@@ -132,5 +132,13 @@ void keyboardKeysCallback(GLFWwindow *window, int key, int scancode, int action,
 				globalParticle = getWood();
 			}
 		}break;
+
+		case GLFW_KEY_5:
+		{
+			if (action == GLFW_PRESS)
+			{
+				globalParticle = getFire();
+			}
+		}break;
 	}
 }

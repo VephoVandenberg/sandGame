@@ -28,13 +28,14 @@ void screenClear(game_t *game, uint32_t color);
 void render(game_t *game, float dt);
 
 void renderParticles(game_t *game);
-void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t width, uint32_t height);
+void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t width, uint32_t height, float dt);
 
 particle_t getSand(void);
 particle_t getWater(void);
 particle_t getEmpty(void);
 particle_t getSmoke(void);
 particle_t getWood(void);
+particle_t getFire(void);
 
 void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle);
 
