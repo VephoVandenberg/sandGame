@@ -297,20 +297,23 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 
 						if (particles[up].particleType != SMOKE && 
 							particles[up].particleType != WOOD && 
-							particles[up].particleType != SAND)
+							particles[up].particleType != SAND &&
+							particles[up].particleType != FIRE)
 						{
 							swapParticles(&particles[particlePos], &particles[up], width, height);
 						}
 						else if ((particles[leftAndUp].particleType != SMOKE && 
-								  particles[up].particleType != WOOD  && 
-								  particles[up].particleType != SAND) && 
+								  particles[leftAndUp].particleType != WOOD  && 
+								  particles[leftAndUp].particleType != SAND && 
+								  particles[leftAndUp].particleType != FIRE) && 
 								  y - 1 > 0)
 						{
 							swapParticles(&particles[particlePos], &particles[leftAndUp], width, height);
 						}
 						else if ((particles[rightAndUp].particleType != SMOKE && 
-								  particles[up].particleType != WOOD && 
-								  particles[up].particleType != SAND) && 
+								  particles[rightAndUp].particleType != WOOD && 
+								  particles[rightAndUp].particleType != SAND && 
+								  particles[rightAndUp].particleType != FIRE) && 
 								  y - 1 > 0)
 						{
 							swapParticles(&particles[particlePos], &particles[rightAndUp], width, height);
@@ -328,10 +331,11 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						left 			= (y) * width + (x - 1);
 						right 			= (y) * width + (x + 1);
 
-						particles[particlePos].lifeSpan -= dt;
+						particles[particlePos].lifeSpan -= 4 * dt;
+						particles[particlePos].color.g -= 4 * dt;
 						if (particles[particlePos].lifeSpan > 0.0f)
 						{
-							if (particles[particlePos].lifeSpan < 9.0f)
+							if (particles[particlePos].lifeSpan < 3.0f)
 							{
 								if (y + 1 < height - 1 && y - 1 > 0 &&
 									x + 1 < width  - 1 && x - 1 > 0)
@@ -470,7 +474,7 @@ particle_t getEmpty(void)
 particle_t getFire(void)
 {
 	particle_t fireParticle;
-	fireParticle.lifeSpan = 10.0f;
+	fireParticle.lifeSpan = 4.0f;
 	fireParticle.isSolid = false;
 	fireParticle.particleType = FIRE;
 	fireParticle.color = fireColor;
