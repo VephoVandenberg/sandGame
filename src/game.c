@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "game.h"
 #include "shader.h"
@@ -331,11 +332,15 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						left 			= (y) * width + (x - 1);
 						right 			= (y) * width + (x + 1);
 
-						particles[particlePos].lifeSpan -= 4 * dt;
-						particles[particlePos].color.g -= 4 * dt;
-						if (particles[particlePos].lifeSpan > 0.0f)
+						particles[particlePos].lifeSpan -= 2 * dt;
+
+						uint32_t chance = rand() % 2;
+						color_t tempColor = {111, 22,  0};
+						particles[particlePos].color = (chance) ? fireColor : tempColor;
+
+						if (particles[particlePos].lifeSpan > 0.0f )
 						{
-							if (particles[particlePos].lifeSpan < 3.0f)
+							if (particles[particlePos].lifeSpan < 3.0f && chance)
 							{
 								if (y + 1 < height - 1 && y - 1 > 0 &&
 									x + 1 < width  - 1 && x - 1 > 0)
@@ -388,6 +393,8 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 										particles[right].position.y = y;
 										particles[right].position.x = x + 1;
 									}
+
+
 								}
 							}
 						}
