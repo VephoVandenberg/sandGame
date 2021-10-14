@@ -123,15 +123,14 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 	{
 		for (uint32_t x = 0; x < width; x++)
 		{
-			uint32_t down;
-			uint32_t left;
-			uint32_t right;
-			uint32_t leftAndDown;
-			uint32_t rightAndDown;
-
-			uint32_t up;
-			uint32_t leftAndUp;
-			uint32_t rightAndUp;
+			uint32_t down 			= (y + 1) * width + (x);
+			uint32_t up 			= (y - 1) * width + (x);
+			uint32_t leftAndDown 	= (y + 1) * width + (x - 1);
+			uint32_t rightAndDown	= (y + 1) * width + (x + 1);
+			uint32_t leftAndUp 		= (y - 1) * width + (x - 1);
+			uint32_t rightAndUp 	= (y - 1) * width + (x + 1);
+			uint32_t left 			= (y) * width + (x - 1);
+			uint32_t right 			= (y) * width + (x + 1);
 
 			uint32_t particlePos = GET_POSITION(x, y, width, height);
 
@@ -164,24 +163,33 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 							}
 						}
 
-						if (!particles[down].isSolid && 
-							!particles[down].updated)
+						if (particles[up].particleType == ACID)
 						{
-							swapParticles(&particles[particlePos], &particles[down], width, height);
+							particles[particlePos] = getEmpty();
+							particles[particlePos].position.x = x;
+							particles[particlePos].position.y = y;
 						}
-						else if (!particles[leftAndDown].isSolid && 
-								  y + 1 < height - 1 &&
-								  x - 1 > 0)
+						else
 						{
-							particles[particlePos].velocity.y = sandVelocity.y;
-							swapParticles(&particles[particlePos], &particles[leftAndDown], width, height);
-						}
-						else if (!particles[rightAndDown].isSolid && 
-							     y + 1 < height - 1 &&
-							     x + 1 < width - 1)
-						{
-							particles[particlePos].velocity.y = sandVelocity.y;
-							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
+							if (!particles[down].isSolid && 
+								!particles[down].updated)
+							{
+								swapParticles(&particles[particlePos], &particles[down], width, height);
+							}
+							else if (!particles[leftAndDown].isSolid && 
+									  y + 1 < height - 1 &&
+									  x - 1 > 0)
+							{
+								particles[particlePos].velocity.y = sandVelocity.y;
+								swapParticles(&particles[particlePos], &particles[leftAndDown], width, height);
+							}
+							else if (!particles[rightAndDown].isSolid && 
+								     y + 1 < height - 1 &&
+								     x + 1 < width - 1)
+							{
+								particles[particlePos].velocity.y = sandVelocity.y;
+								swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
+							}
 						}
 					}break;
 
@@ -323,15 +331,6 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 
 					case FIRE:
 					{
-						down 			= (y + 1) * width + (x);
-						up 				= (y - 1) * width + (x);
-						leftAndDown 	= (y + 1) * width + (x - 1);
-						rightAndDown	= (y + 1) * width + (x + 1);
-						leftAndUp 		= (y - 1) * width + (x - 1);
-						rightAndUp 		= (y - 1) * width + (x + 1);
-						left 			= (y) * width + (x - 1);
-						right 			= (y) * width + (x + 1);
-
 						particles[particlePos].lifeSpan -= 2 * dt;
 
 						uint32_t chance = rand() % 2;
@@ -513,14 +512,12 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 
 					case WOOD:
 					{
-						up 		= (y - 1) * width + (x);
-						left 	= (y) * width + (x - 1);
-						right 	= (y) * width + (x + 1);
-
 						uint32_t chance = rand() % 2;
 						if (chance)
 						{
-							if (particles[up].particleType == ACID || particles[left].particleType == ACID || particles[right].particleType == ACID)
+							if (particles[up].particleType == ACID   || 
+								particles[left].particleType == ACID || 
+								particles[right].particleType == ACID)
 							{
 								particles[particlePos] = getEmpty();
 								particles[particlePos].position.x = x;
