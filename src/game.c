@@ -14,17 +14,18 @@ static color_t waterColor  	= {35,  137, 218};
 static color_t smokeColor  	= {230, 237, 232};
 static color_t woodColor 	= {133, 94,  66};
 static color_t fireColor 	= {255, 72,  0};
+static color_t acidColor  	= {0,   191, 0};
  
 static vec2_t sandVelocity 	= {0,  5};
 static vec2_t waterVelocity = {3,  5};
+static vec2_t acidVelocity 	= {3,  5};
 static vec2_t smokeVelocity = {0, -2};
 
 static uint32_t gravityY = 1;
 
 static void fillParticles(game_t *game);
 static void swapParticles(particle_t *particle1, particle_t *particle2, uint32_t width, uint32_t height);
-
-uint32_t colorToInt32(color_t *color);
+static uint32_t colorToInt32(color_t *color);
 
 void screenClear(game_t *game, uint32_t color)
 {
@@ -97,11 +98,6 @@ void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight)
 	{
 		printf("Game pointer is NULL.\n");
 	}
-}
-
-uint32_t colorToInt32(color_t *color)
-{
-	return (color->r << 24) | (color->g << 16) | (color->b << 8) | 255;
 }
 
 void render(game_t *game, float dt)
@@ -194,7 +190,6 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						particles[particlePos].velocity.y += gravityY;
 						for (uint32_t dVelocityY = 1; dVelocityY < particles[particlePos].velocity.y; dVelocityY++)
 						{
-						
 							down 		 = (y + dVelocityY) * width + (x);
 							leftAndDown  = (y + dVelocityY) * width + (x - 1);
 							rightAndDown = (y + dVelocityY) * width + (x + 1);
@@ -209,7 +204,8 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 							
 							if (particles[(y + dVelocityY + 1) * width + (x)].particleType == SAND  ||
 								particles[(y + dVelocityY + 1) * width + (x)].particleType == WATER ||
-								particles[(y + dVelocityY + 1) * width + (x)].particleType == WOOD)
+								particles[(y + dVelocityY + 1) * width + (x)].particleType == WOOD 	||
+								particles[(y + dVelocityY + 1) * width + (x)].particleType == ACID)
 							{
 								break;
 							}
@@ -235,35 +231,39 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 
 							if (particles[left - 1].particleType == SAND  ||
 								particles[left - 1].particleType == WOOD  ||
+								particles[left - 1].particleType == ACID  ||
 								particles[right + 1].particleType == SAND || 
-								particles[right + 1].particleType == WOOD)
+								particles[right + 1].particleType == WOOD ||
+								particles[right + 1].particleType == ACID)
 							{
 								break;
 							}
 						}
-						if (particles[down].particleType == EMPTY && !particles[down].updated)
+						if ((particles[down].particleType == EMPTY || particles[down].particleType == ACID) && !particles[down].updated)
 						{
 							swapParticles(&particles[particlePos], &particles[down], width, height);
 						}
-						else if (particles[leftAndDown].particleType == EMPTY &&
+						else if ((particles[leftAndDown].particleType == EMPTY || particles[leftAndDown].particleType == ACID) &&
 								 y + 1 < height - 1 &&
 								 x - 1 > 0)
 						{
 							particles[particlePos].velocity = waterVelocity;
 							swapParticles(&particles[particlePos], &particles[leftAndDown], width, height);
 						}
-						else if (particles[rightAndDown].particleType == EMPTY &&
+						else if ((particles[rightAndDown].particleType == EMPTY || particles[rightAndDown].particleType == ACID) &&
 								 y + 1 < height - 1 &&
 								 x + 1 < width - 1)
 						{
 							particles[particlePos].velocity = waterVelocity;
 							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
 						}
-						else if (particles[right].particleType == EMPTY && particles[down].particleType != EMPTY)
+						else if ((particles[right].particleType == EMPTY || particles[right].particleType == ACID) && 
+								  particles[down].particleType != EMPTY)
 						{
 							swapParticles(&particles[particlePos], &particles[right], width, height);
 						}
-						else if (particles[left].particleType == EMPTY && particles[down].particleType != EMPTY)
+						else if ((particles[left].particleType == EMPTY || particles[left].particleType == ACID) && 
+								  particles[down].particleType != EMPTY)
 						{
 							swapParticles(&particles[particlePos], &particles[left], width, height);
 						}
@@ -393,8 +393,6 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 										particles[right].position.y = y;
 										particles[right].position.x = x + 1;
 									}
-
-
 								}
 							}
 						}
@@ -406,10 +404,147 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						}
 					}break;
 
+					case ACID:
+					{
+						particles[particlePos].velocity.y += gravityY;
+						for (uint32_t dVelocityY = 1; dVelocityY < particles[particlePos].velocity.y; dVelocityY++)
+						{
+							down 		 = (y + dVelocityY) * width + (x);
+							leftAndDown  = (y + dVelocityY) * width + (x - 1);
+							rightAndDown = (y + dVelocityY) * width + (x + 1);
+							
+							if (y + dVelocityY >= height - 1)
+							{
+								down 		 = (height - 1) * width + (x);
+								leftAndDown  = (height - 1) * width + (x - 1);
+								rightAndDown = (height - 1) * width + (x + 1);
+								break;
+							}
+							
+							if (particles[(y + dVelocityY + 1) * width + (x)].particleType == SAND  ||
+								particles[(y + dVelocityY + 1) * width + (x)].particleType == WOOD 	||
+								particles[(y + dVelocityY + 1) * width + (x)].particleType == ACID)
+							{
+								break;
+							}
+
+							if (particles[(y + dVelocityY + 1) * width + (x)].particleType == WATER)
+							{
+								particles[particlePos] = getWater();
+								particles[particlePos].position.x = x;
+								particles[particlePos].position.y = y; 
+								break;
+							}
+						}
+
+
+						for (uint32_t dVelocityX = 1; dVelocityX <= particles[particlePos].velocity.x; dVelocityX+=2)
+						{
+							left  = particlePos - dVelocityX;
+							right = particlePos + dVelocityX;
+
+							if (x - dVelocityX <= 0)
+							{
+								left = (y) * width + 1;
+								break;
+							}
+
+							if (x + dVelocityX >= width - 1)
+							{
+								right = (y) * width + (width - 1);
+								break;
+							}
+
+							if (particles[left - 1].particleType == SAND  ||
+								particles[left - 1].particleType == WOOD  ||
+								particles[right + 1].particleType == SAND || 
+								particles[right + 1].particleType == WOOD)
+							{
+								break;
+							}
+
+							if (particles[right + 1].particleType == WATER)
+							{
+								particles[particlePos] = getWater();
+								particles[particlePos].position.x = x;
+								particles[particlePos].position.y = y; 
+								break;
+							}
+
+							if (particles[left - 1].particleType == WATER)
+							{
+								particles[particlePos] = getWater();
+								particles[particlePos].position.x = x;
+								particles[particlePos].position.y = y; 
+								break;
+							}
+						}
+
+						if (particles[down].particleType == EMPTY && 
+							!particles[down].updated)
+						{
+							swapParticles(&particles[particlePos], &particles[down], width, height);	
+						}
+						else if (particles[leftAndDown].particleType == EMPTY &&
+								 y + 1 < height - 1 &&
+								 x - 1 > 0)
+						{ 
+							particles[particlePos].velocity = acidVelocity;
+							swapParticles(&particles[particlePos], &particles[leftAndDown], width, height);
+						}
+						else if (particles[rightAndDown].particleType == EMPTY &&
+								 y + 1 < height - 1 &&
+								 x + 1 < width - 1)
+						{
+							particles[particlePos].velocity = acidVelocity;
+							swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
+						}
+						else if (particles[right].particleType == EMPTY && 
+								 particles[down].particleType != EMPTY)
+						{
+							swapParticles(&particles[particlePos], &particles[right], width, height);
+						}
+						else if (particles[left].particleType == EMPTY && 
+								 particles[down].particleType != EMPTY)
+						{
+							swapParticles(&particles[particlePos], &particles[left], width, height);
+						}
+					}break;
+
 					case WOOD:
+					{
+						up 		= (y - 1) * width + (x);
+						left 	= (y) * width + (x - 1);
+						right 	= (y) * width + (x + 1);
+
+						uint32_t chance = rand() % 2;
+						if (chance)
+						{
+							if (particles[up].particleType == ACID || particles[left].particleType == ACID || particles[right].particleType == ACID)
+							{
+								particles[particlePos] = getEmpty();
+								particles[particlePos].position.x = x;
+								particles[particlePos].position.y = y;
+							}
+						}
+
+					}break;
+
+					case SALT:
 					{
 
 					}break;
+
+					case DUST:
+					{
+
+					}break;
+
+					case DIRT:
+					{
+
+					}break;
+
 
 					case EMPTY:
 					{
@@ -442,6 +577,65 @@ particle_t getWater(void)
 	waterParticle.color = waterColor;
 
 	return waterParticle;
+}
+
+void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle)
+{
+	for (uint32_t y = 0; y < brushHeight; y++)
+	{
+		for (uint32_t x = 0; x < brushWidth; x++)
+		{
+			if (game->particles[(yPos + y) * game->width + (xPos + x)].particleType == EMPTY)
+			{
+				game->particles[(yPos + y) * game->width + (xPos + x)] = *particle;
+				game->particles[(yPos + y) * game->width + (xPos + x)].position.x = xPos + x;
+				game->particles[(yPos + y) * game->width + (xPos + x)].position.y = yPos + y;
+			}
+		}
+	}
+}
+
+static uint32_t colorToInt32(color_t *color)
+{
+	return (color->r << 24) | (color->g << 16) | (color->b << 8) | 255;
+}
+
+static void fillParticles(game_t *game)
+{
+	for (int y = 0; y < game->height; y++)
+	{
+		for (int x = 0; x < game->width; x++)
+		{
+			game->particles[y * game->width + x] = getEmpty();
+			game->particles[y * game->width + x].position.x = x;
+			game->particles[y * game->width + x].position.y = y;
+		}
+	}
+}
+
+static void swapParticles(particle_t *particle1, particle_t *particle2, uint32_t width, uint32_t height)
+{
+	if (particle1->position.x + 1 < width - 1 && particle1->position.x - 1 >= 0 &&
+		particle2->position.x + 1 < width - 1 && particle2->position.x - 1 >= 0)
+	{
+		enum type particleType	= particle1->particleType;
+		color_t color 			= particle1->color;
+		vec2_t velocity 		= particle1->velocity;
+		bool isSolid 			= particle1->isSolid;
+		
+		particle1->particleType = particle2->particleType;
+		particle1->color 		= particle2->color;
+		particle1->velocity 	= particle2->velocity;
+		particle1->isSolid 		= particle2->isSolid;
+
+		particle2->particleType = particleType;
+		particle2->color 		= color;
+		particle2->velocity 	= velocity;
+		particle2->isSolid  	= isSolid;
+
+		particle1->updated = true;
+		particle2->updated = true;
+	}
 }
 
 particle_t getSmoke(void)
@@ -489,57 +683,13 @@ particle_t getFire(void)
 	return fireParticle;
 }
 
-void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle)
+particle_t getAcid(void)
 {
-	for (uint32_t y = 0; y < brushHeight; y++)
-	{
-		for (uint32_t x = 0; x < brushWidth; x++)
-		{
-			if (game->particles[(yPos + y) * game->width + (xPos + x)].particleType == EMPTY)
-			{
-				game->particles[(yPos + y) * game->width + (xPos + x)] = *particle;
-				game->particles[(yPos + y) * game->width + (xPos + x)].position.x = xPos + x;
-				game->particles[(yPos + y) * game->width + (xPos + x)].position.y = yPos + y;
-			}
-		}
-	}
-}
+	particle_t acidParticle;
+	acidParticle.lifeSpan = -1.0f;
+	acidParticle.isSolid = false;
+	acidParticle.particleType = ACID;
+	acidParticle.color = acidColor;
 
-
-static void fillParticles(game_t *game)
-{
-	for (int y = 0; y < game->height; y++)
-	{
-		for (int x = 0; x < game->width; x++)
-		{
-			game->particles[y * game->width + x] = getEmpty();
-			game->particles[y * game->width + x].position.x = x;
-			game->particles[y * game->width + x].position.y = y;
-		}
-	}
-}
-
-static void swapParticles(particle_t *particle1, particle_t *particle2, uint32_t width, uint32_t height)
-{
-	if (particle1->position.x + 1 < width - 1 && particle1->position.x - 1 >= 0 &&
-		particle2->position.x + 1 < width - 1 && particle2->position.x - 1 >= 0)
-	{
-		enum type particleType	= particle1->particleType;
-		color_t color 			= particle1->color;
-		vec2_t velocity 		= particle1->velocity;
-		bool isSolid 			= particle1->isSolid;
-		
-		particle1->particleType = particle2->particleType;
-		particle1->color 		= particle2->color;
-		particle1->velocity 	= particle2->velocity;
-		particle1->isSolid 		= particle2->isSolid;
-
-		particle2->particleType = particleType;
-		particle2->color 		= color;
-		particle2->velocity 	= velocity;
-		particle2->isSolid  	= isSolid;
-
-		particle1->updated = true;
-		particle2->updated = true;
-	}
+	return acidParticle;
 }

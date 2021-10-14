@@ -140,5 +140,13 @@ void keyboardKeysCallback(GLFWwindow *window, int key, int scancode, int action,
 				globalParticle = getFire();
 			}
 		}break;
+
+		case GLFW_KEY_6:
+		{
+			if (action == GLFW_PRESS)
+			{
+				globalParticle = getAcid();
+			}
+		}
 	}
 }
