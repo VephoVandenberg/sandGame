@@ -37,7 +37,6 @@ int main(int argc, char **argv)
 	glfwSetMouseButtonCallback(window, mouseClickCallback);
 	glfwSetKeyCallback(window, keyboardKeysCallback);
 	glfwMakeContextCurrent(window);
-	// glfwSwapInterval(1);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -154,6 +153,22 @@ void keyboardKeysCallback(GLFWwindow *window, int key, int scancode, int action,
 			if (action == GLFW_PRESS)
 			{
 				globalParticle = getSalt();
+			}
+		}break;
+
+		case GLFW_KEY_8:
+		{
+			if (action == GLFW_PRESS)
+			{
+				globalParticle = getDust();
+			}
+		}break;
+
+		case GLFW_KEY_9:
+		{
+			if (action == GLFW_PRESS)
+			{
+				globalParticle = getDirt();
 			}
 		}break;
 	}

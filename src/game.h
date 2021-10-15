@@ -38,6 +38,8 @@ particle_t getWood(void);
 particle_t getFire(void);
 particle_t getAcid(void);
 particle_t getSalt(void);
+particle_t getDust(void);
+particle_t getDirt(void);
 
 void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle);
 
