@@ -21,7 +21,8 @@ void keyboardKeysCallback(GLFWwindow *window, int key, int scancode, int action,
 
 game_t game;
 particle_t globalParticle;
-vec2f_t mouseCoords;
+vec2f_t newMouseCoords;
+vec2f_t oldMouseCoords;
 bool brushInUse;
 
 int main(int argc, char **argv)
@@ -60,10 +61,12 @@ int main(int argc, char **argv)
 
 		if (brushInUse)
 		{
-			if (mouseCoords.x - BRUSH_SIZE_X > 1.0f && mouseCoords.x + BRUSH_SIZE_X < game.width &&
-				mouseCoords.y - BRUSH_SIZE_Y > 1.0f && mouseCoords.y + BRUSH_SIZE_Y < game.height)
+			if (oldMouseCoords.x - BRUSH_SIZE_X/2 > 1.0f && oldMouseCoords.x + BRUSH_SIZE_X/2 < game.width &&
+				oldMouseCoords.y - BRUSH_SIZE_Y/2 > 1.0f && oldMouseCoords.y + BRUSH_SIZE_Y/2 < game.height &&
+				newMouseCoords.x - BRUSH_SIZE_X/2 > 1.0f && newMouseCoords.x + BRUSH_SIZE_X/2 < game.width &&
+				newMouseCoords.y - BRUSH_SIZE_Y/2 > 1.0f && newMouseCoords.y + BRUSH_SIZE_Y/2 < game.height)
 			{
-				useBrush(&game, mouseCoords.x, mouseCoords.y, BRUSH_SIZE_X, BRUSH_SIZE_Y, &globalParticle);
+				
 			}
 		}
 
@@ -77,8 +80,10 @@ int main(int argc, char **argv)
 
 void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos)
 {
-	mouseCoords.x = xPos;
-	mouseCoords.y = yPos;
+	oldMouseCoords.x = newMouseCoords.x;
+	oldMouseCoords.y = newMouseCoords.y;
+	newMouseCoords.x = xPos;
+	newMouseCoords.y = yPos;
 }
 
 void mouseClickCallback(GLFWwindow *window, int button, int action, int mods)
