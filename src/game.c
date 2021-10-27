@@ -270,31 +270,36 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						}
 						else
 						{
-							if ((particles[down].particleType == EMPTY || particles[down].particleType == ACID) && 
+							if ((particles[down].particleType == EMPTY || 
+								 particles[down].particleType == ACID) && 
 								 !particles[down].updated)
 							{
 								swapParticles(&particles[particlePos], &particles[down], width, height);
 							}
-							else if ((particles[leftAndDown].particleType == EMPTY || particles[leftAndDown].particleType == ACID) &&
+							else if ((particles[leftAndDown].particleType == EMPTY || 
+									  particles[leftAndDown].particleType == ACID) &&
 									 y + 1 < height - 1 &&
 									 x - 1 > 0)
 							{
 								particles[particlePos].velocity = waterVelocity;
 								swapParticles(&particles[particlePos], &particles[leftAndDown], width, height);
 							}
-							else if ((particles[rightAndDown].particleType == EMPTY || particles[rightAndDown].particleType == ACID) &&
+							else if ((particles[rightAndDown].particleType == EMPTY || 
+									  particles[rightAndDown].particleType == ACID) &&
 									 y + 1 < height - 1 &&
 									 x + 1 < width - 1)
 							{
 								particles[particlePos].velocity = waterVelocity;
 								swapParticles(&particles[particlePos], &particles[rightAndDown], width, height);
 							}
-							else if ((particles[right].particleType == EMPTY || particles[right].particleType == ACID) && 
+							else if ((particles[right].particleType == EMPTY || 
+									  particles[right].particleType == ACID) && 
 									  particles[down].particleType != EMPTY)
 							{
 								swapParticles(&particles[particlePos], &particles[right], width, height);
 							}
-							else if ((particles[left].particleType == EMPTY || particles[left].particleType == ACID) && 
+							else if ((particles[left].particleType == EMPTY || 
+									  particles[left].particleType == ACID) && 
 									  particles[down].particleType != EMPTY)
 							{
 								swapParticles(&particles[particlePos], &particles[left], width, height);
@@ -330,23 +335,23 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 						}
 
 						if (particles[up].particleType != SMOKE && 
-							particles[up].particleType != WOOD && 
-							particles[up].particleType != SAND &&
+							particles[up].particleType != WOOD  && 
+							particles[up].particleType != SAND  &&
 							particles[up].particleType != FIRE)
 						{
 							swapParticles(&particles[particlePos], &particles[up], width, height);
 						}
 						else if ((particles[leftAndUp].particleType != SMOKE && 
 								  particles[leftAndUp].particleType != WOOD  && 
-								  particles[leftAndUp].particleType != SAND && 
+								  particles[leftAndUp].particleType != SAND  && 
 								  particles[leftAndUp].particleType != FIRE) && 
 								  y - 1 > 0)
 						{
 							swapParticles(&particles[particlePos], &particles[leftAndUp], width, height);
 						}
 						else if ((particles[rightAndUp].particleType != SMOKE && 
-								  particles[rightAndUp].particleType != WOOD && 
-								  particles[rightAndUp].particleType != SAND && 
+								  particles[rightAndUp].particleType != WOOD  && 
+								  particles[rightAndUp].particleType != SAND  && 
 								  particles[rightAndUp].particleType != FIRE) && 
 								  y - 1 > 0)
 						{
@@ -875,6 +880,7 @@ particle_t getSand(void)
 	sandParticle.particleType = SAND;
 	sandParticle.velocity = sandVelocity;
 	sandParticle.color = sandColor;
+
 	return sandParticle;
 }
 
@@ -981,4 +987,10 @@ particle_t getDust(void)
 	dustParticle.color = dustColor;
 
 	return dustParticle;
+}
+
+void clearAll(game_t *game)
+{
+	free(game->data);
+	free(game->particles);
 }

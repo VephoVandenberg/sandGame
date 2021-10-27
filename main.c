@@ -72,6 +72,8 @@ int main(int argc, char **argv)
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
+
+	clearAll(&game);
 	return 0;
 }
 

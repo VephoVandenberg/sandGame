@@ -26,6 +26,7 @@ typedef struct game
 void initScreen(game_t *game, uint32_t screenWidth, uint32_t screenHeight);
 void screenClear(game_t *game, uint32_t color);
 void render(game_t *game, float dt);
+void clearAll(game_t *game);
 
 void renderParticles(game_t *game);
 void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t width, uint32_t height, float dt);
