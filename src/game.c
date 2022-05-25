@@ -25,6 +25,7 @@ static vec2_t acidVelocity 	= {3,  5};
 static vec2_t smokeVelocity = {0, -2};
 static vec2_t dustVelocity  = {0,  5};
 static vec2_t dirtVelocity  = {3,  5};
+static vec2_t fireVelocity  = {0, -5};
 
 static uint32_t gravityY = 1;
 
@@ -810,17 +811,17 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 	}
 }
 
-void useBrush(game_t *game, uint32_t xPos, uint32_t yPos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle)
+void useBrush(game_t *game, uint32_t x1Pos, uint32_t y1Pos, uint32_t x2Pos, uint32_t y2Pos, uint32_t brushWidth, uint32_t brushHeight, particle_t *particle)
 {
 	for (uint32_t y = 0; y < brushHeight; y++)
 	{
 		for (uint32_t x = 0; x < brushWidth; x++)
 		{
-			if (game->particles[(yPos + y) * game->width + (xPos + x)].particleType == EMPTY)
+			if (game->particles[(y1Pos + y) * game->width + (x1Pos + x)].particleType == EMPTY)
 			{
-				game->particles[(yPos + y) * game->width + (xPos + x)] = *particle;
-				game->particles[(yPos + y) * game->width + (xPos + x)].position.x = xPos + x;
-				game->particles[(yPos + y) * game->width + (xPos + x)].position.y = yPos + y;
+				game->particles[(y1Pos + y) * game->width + (x1Pos + x)] = *particle;
+				game->particles[(y1Pos + y) * game->width + (x1Pos + x)].position.x = x1Pos + x;
+				game->particles[(y1Pos + y) * game->width + (x1Pos + x)].position.y = y1Pos + y;
 			}
 		}
 	}

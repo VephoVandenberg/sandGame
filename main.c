@@ -22,6 +22,7 @@ void keyboardKeysCallback(GLFWwindow *window, int key, int scancode, int action,
 game_t game;
 particle_t globalParticle;
 vec2f_t mouseCoords;
+vec2f_t prevMouseCoords;
 bool brushInUse;
 
 int main(int argc, char **argv)
@@ -63,7 +64,10 @@ int main(int argc, char **argv)
 			if (mouseCoords.x - BRUSH_SIZE_X/2 > 1.0f && mouseCoords.x + BRUSH_SIZE_X/2 < game.width &&
 				mouseCoords.y - BRUSH_SIZE_Y/2 > 1.0f && mouseCoords.y + BRUSH_SIZE_Y/2 < game.height)
 			{
-				useBrush(&game, mouseCoords.x - BRUSH_SIZE_X/2, mouseCoords.y + BRUSH_SIZE_Y/2, BRUSH_SIZE_X, BRUSH_SIZE_Y, &globalParticle);
+				useBrush(&game, prevMouseCoords.x - BRUSH_SIZE_X/2, prevMouseCoords.y + BRUSH_SIZE_Y/2,
+				 mouseCoords.x - BRUSH_SIZE_X/2, mouseCoords.y + BRUSH_SIZE_Y/2,
+				  BRUSH_SIZE_X, BRUSH_SIZE_Y,
+				   &globalParticle);
 			}
 		}
 
@@ -79,6 +83,9 @@ int main(int argc, char **argv)
 
 void cursorPositionCallback(GLFWwindow *window, double xPos, double yPos)
 {
+	prevMouseCoords.x = mouseCoords.x;
+	prevMouseCoords.y = mouseCoords.y;
+
 	mouseCoords.x = xPos;
 	mouseCoords.y = yPos;
 }
