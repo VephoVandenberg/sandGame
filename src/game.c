@@ -425,6 +425,10 @@ void updateParticles(particle_t *particles, uint32_t numberOfParticles, uint32_t
 									}
 								}
 							}
+							if (chance)
+							{
+								swapParticles(&particles[particlePos], &particles[up], width, height);
+							}
 						}
 						else
 						{
