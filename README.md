@@ -1,6 +1,6 @@
 # Sand Engine
 
-This is a sand engine wrtten using straight C with OpenGL support libs GLFW and GLEW. You can test out the engine downloading the zip archive or build the project by your own. Now the work is going on reworking fire.
+This is a sand engine wrtten using straight C with OpenGL support libs GLFW and GLEW. You can test out the engine downloading the zip archive or build the project by your own, I've added recently a makefile if you are on Linux based system, make sure that you have GLFW and GLEW installed. Now the work is going on reworking fire.
 
 # Links to the resources
 
